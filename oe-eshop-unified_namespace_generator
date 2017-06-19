@@ -1,0 +1,59 @@
+#!/usr/bin/env php
+<?php
+/**
+ * This file is part of OXID eSales Unified Namespaces file generation script.
+ *
+ * OXID eSales Unified Namespaces file generation is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * OXID eSales IDE code completion helper script is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with OXID eSales IDE code completion helper script. If not, see <http://www.gnu.org/licenses/>.
+ *
+ * @link          http://www.oxid-esales.com
+ * @copyright (C) OXID eSales AG 2003-2017
+ */
+
+$installationRootPath =  dirname(dirname(dirname(dirname(__FILE__))));
+$vendorPath = $installationRootPath . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR;
+
+require_once $vendorPath . 'autoload.php';
+
+/**
+ * We always want to provide clear state:
+ * - Before generating the files, the old ones are deleted in order not to end up with something 'mixed'
+ * - In case of error, all generated files will be deleted in order not to end up with something 'incomplete'
+ */
+try {
+    $facts = new \OxidEsales\Facts\Facts();
+    $unifiedNameSpaceClassMapProvider = new \OxidEsales\UnifiedNameSpaceGenerator\UnifiedNameSpaceClassMapProvider($facts);
+    $generator = new \OxidEsales\UnifiedNameSpaceGenerator\Generator($facts, $unifiedNameSpaceClassMapProvider);
+    $generator->cleanupOutputDirectory();
+    $generator->generate();
+} catch (\Exception $exception) {
+    $message = $exception->getMessage();
+    $code = $exception->getCode();
+    $traceString = $exception->getTraceAsString();
+    try {
+        $unifiedNameSpaceClassMapProvider = new \OxidEsales\UnifiedNameSpaceGenerator\UnifiedNameSpaceClassMapProvider($facts);
+        $generator = new \OxidEsales\UnifiedNameSpaceGenerator\Generator($facts, $unifiedNameSpaceClassMapProvider);
+        $generator->cleanupOutputDirectory();
+    } catch (\Exception $exception) {
+        $message = $exception->getMessage();
+        $code = $exception->getCode();
+        $traceString = $exception->getTraceAsString();
+    }
+
+    echo $message . PHP_EOL;
+    echo "error code: $code" . PHP_EOL;
+    echo "stack trace:" . PHP_EOL;
+    echo $traceString . PHP_EOL;
+    exit(1);
+}
+exit(0);

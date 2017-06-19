@@ -1,0 +1,4 @@
+generated
+!generated/.gitkeep
+src/smarty/templates_c
+!src/smarty/templates_c/.gitkeep

@@ -1,0 +1,45 @@
+<?php
+/**
+ * This file is part of one OXID eShop Composer plugin.
+ *
+ * OXID eShop Composer plugin is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * OXID eShop Composer plugin is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with OXID eShop Composer plugin.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * @link      http://www.oxid-esales.com
+ * @copyright (C) OXID eSales AG 2003-2017
+ */
+
+namespace OxidEsales\UnifiedNameSpaceGenerator\tests;
+
+class PluginTest extends \PHPUnit_Framework_TestCase
+{
+    /**
+     * Test, that the methods of the generator we want are called.
+     */
+    public function testGeneratorMethodsAreCalled()
+    {
+        $facts = new \OxidEsales\Facts\Facts();
+
+        $generatorMock = $this->getMock(
+            \OxidEsales\UnifiedNameSpaceGenerator\Generator::class,
+            ['cleanupOutputDirectory', 'generate'],
+            [$facts, new \OxidEsales\UnifiedNameSpaceGenerator\UnifiedNameSpaceClassMapProvider($facts)]
+        );
+        $generatorMock->expects($this->once())->method('cleanupOutputDirectory');
+        $generatorMock->expects($this->once())->method('generate');
+
+        $pluginMock = $this->getMock(\OxidEsales\UnifiedNameSpaceGenerator\Plugin::class, ['getGenerator']);
+        $pluginMock->expects($this->atLeastOnce())->method('getGenerator')->willReturn($generatorMock);
+        $pluginMock->callback();
+    }
+}
