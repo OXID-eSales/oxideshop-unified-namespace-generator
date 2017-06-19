@@ -1,0 +1,1 @@
+# oxideshop-unified-namespace-generator
