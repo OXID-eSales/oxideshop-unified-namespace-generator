@@ -7,13 +7,13 @@
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * OXID eSales IDE code completion helper script is distributed in the hope that it will be useful,
+ * OXID eSales Unified Namespaces file generation script is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with OXID eSales IDE code completion helper script. If not, see <http://www.gnu.org/licenses/>.
+ * along with OXID eSales Unified Namespaces file generation script. If not, see <http://www.gnu.org/licenses/>.
  *
  * @link          http://www.oxid-esales.com
  * @copyright (C) OXID eSales AG 2003-2017
