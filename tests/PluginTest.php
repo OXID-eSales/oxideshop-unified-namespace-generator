@@ -28,13 +28,10 @@ class PluginTest extends \PHPUnit_Framework_TestCase
      */
     public function testGeneratorMethodsAreCalled()
     {
-        $facts = new \OxidEsales\Facts\Facts();
-
-        $generatorMock = $this->getMock(
-            \OxidEsales\UnifiedNameSpaceGenerator\Generator::class,
-            ['cleanupOutputDirectory', 'generate'],
-            [$facts, new \OxidEsales\UnifiedNameSpaceGenerator\UnifiedNameSpaceClassMapProvider($facts)]
-        );
+        $generatorMock = $this->getMockBuilder(\OxidEsales\UnifiedNameSpaceGenerator\Generator::class)
+            ->disableOriginalConstructor()
+            ->setMethods(['cleanupOutputDirectory', 'generate'])
+            ->getMock();
         $generatorMock->expects($this->once())->method('cleanupOutputDirectory');
         $generatorMock->expects($this->once())->method('generate');
 
