@@ -15,16 +15,16 @@
  * You should have received a copy of the GNU General Public License
  * along with OXID eSales Unified Namespaces file generation script. If not, see <http://www.gnu.org/licenses/>.
  *
- * @link      http://www.oxid-esales.com
+ * @link          http://www.oxid-esales.com
  * @copyright (C) OXID eSales AG 2003-2017
  */
 
 namespace OxidEsales\UnifiedNameSpaceGenerator;
 
 use Composer\Composer;
+use Composer\EventDispatcher\EventSubscriberInterface;
 use Composer\IO\IOInterface;
 use Composer\Plugin\PluginInterface;
-use Composer\EventDispatcher\EventSubscriberInterface;
 use Composer\Script\ScriptEvents;
 
 /**
@@ -32,18 +32,24 @@ use Composer\Script\ScriptEvents;
  */
 class Plugin implements PluginInterface, EventSubscriberInterface
 {
+
+    /** @type Composer */
+    protected $composer;
+
+    /** @type IOInterface */
+    protected $io;
+
     /**
      * The activation method is called when the plugin is activated.
-     *
-     * It is empty, cause we don't want to do anything at this point of time, but
-     * we have to implement it.
      *
      * @param Composer    $composer
      * @param IOInterface $io
      */
     public function activate(Composer $composer, IOInterface $io)
     {
-
+        /** composer and io properties are assgned for convenience */
+        $this->composer = $composer;
+        $this->io = $io;
     }
 
     /**
@@ -55,7 +61,7 @@ class Plugin implements PluginInterface, EventSubscriberInterface
     {
         return array(
             ScriptEvents::POST_INSTALL_CMD => 'callback',
-            ScriptEvents::POST_UPDATE_CMD => 'callback'
+            ScriptEvents::POST_UPDATE_CMD  => 'callback'
         );
     }
 
@@ -65,9 +71,17 @@ class Plugin implements PluginInterface, EventSubscriberInterface
     public function callback()
     {
         $generator = $this->getGenerator();
-
-        $generator->cleanupOutputDirectory();
-        $generator->generate();
+        try {
+            $this->io->write('<info>Generating OXID eShop unified namespace classes ... </info>', false);
+            $generator->cleanupOutputDirectory();
+            $generator->generate();
+            $this->io->write('<info>Done</info>');
+        } catch (\Exception $exception) {
+            $this->io->writeError('<error>Failed</error>');
+            $this->io->writeError('<error>Error: ' . $exception->getMessage() . '</error>');
+            $this->io->writeError('<error>Code: ' . $exception->getCode() . '</error>');
+            $this->io->writeError('<error>Stacktrace: ' . PHP_EOL . $exception->getTraceAsString() . '</error>');
+        }
     }
 
     /**
