@@ -29,6 +29,8 @@ namespace OxidEsales\UnifiedNameSpaceGenerator\UnifiedNamespaceClassMap;
 class EnterpriseEditionUnifiedNamespaceClassMap extends ProfessionalEditionUnifiedNamespaceClassMap
 {
 
+    protected $editionText = "OXID eShop Enterprise Edition was chosen.";
+
     /**
      * @return array The merged contents of the file UnifiedNamespaceClassMap.php of
      *               OXID eShop Community, Professional and Enterprise editions

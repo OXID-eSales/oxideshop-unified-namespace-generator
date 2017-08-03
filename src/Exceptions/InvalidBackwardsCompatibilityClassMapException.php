@@ -21,7 +21,11 @@
 
 namespace OxidEsales\UnifiedNameSpaceGenerator\Exceptions;
 
-
+/**
+ * Class InvalidBackwardsCompatibilityClassMapException
+ *
+ * @package OxidEsales\UnifiedNameSpaceGenerator\Exceptions
+ */
 class InvalidBackwardsCompatibilityClassMapException extends \Exception
 {
 

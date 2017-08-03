@@ -47,9 +47,7 @@ class Generator
     const ERROR_CODE_DIRECTORY_DELETION_ERROR = 2;
     const ERROR_CODE_DIRECTORY_CREATION_ERROR = 3;
     const ERROR_CODE_FILE_CREATION_ERROR = 4;
-    const ERROR_CODE_MISSING_BACKWARDS_COMPATIBILITY_CLASS_MAP = 5;
     const ERROR_CODE_INVALID_UNIFIED_NAMESPACE_CLASS_MAP = 6;
-    const ERROR_CODE_INVALID_BACKWARDS_COMPATIBILITY_CLASS_MAP = 7;
     const ERROR_CODE_INVALID_UNIFIED_NAMESPACE_CLASS_MAP_ENTRY = 8;
     const ERROR_CODE_INVALID_UNIFIED_CLASS_NAME = 9;
     const ERROR_CODE_INVALID_UNIFIED_NAMESPACE = 10;
@@ -78,8 +76,7 @@ class Generator
         \OxidEsales\Facts\Facts $facts,
         \OxidEsales\UnifiedNameSpaceGenerator\UnifiedNameSpaceClassMapProvider $unifiedNameSpaceClassMapProvider,
         $outputDirectory = __DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'generated' . DIRECTORY_SEPARATOR
-    )
-    {
+    ) {
         $this->facts = $facts;
         $this->unifiedNameSpaceClassMapProvider = $unifiedNameSpaceClassMapProvider;
 
@@ -102,11 +99,18 @@ class Generator
     public function cleanupOutputDirectory()
     {
         $directoryIterator = new \RecursiveDirectoryIterator($this->outputDirectory, \RecursiveDirectoryIterator::SKIP_DOTS);
-        /** Items, which must not be deleted have to be skipped during the directory iteration */
+
+        /**
+         * Items, which must not be deleted have to be skipped during the directory iteration
+         *
+         * @param \SplFileInfo $current
+         * @return bool
+         */
         $filterCallback = function (\SplFileInfo $current) {
             $skipItem = false === strpos($current->getFilename(), '.gitkeep') ? true : false;
             return $skipItem;
         };
+
         $filteredDirectoryIterator = new \RecursiveCallbackFilterIterator($directoryIterator, $filterCallback);
         $items = new \RecursiveIteratorIterator(
             $filteredDirectoryIterator,
@@ -146,39 +150,12 @@ class Generator
     }
 
     /**
-     * Return a map of backwards compatibility classes (e.g. oxArticle) to classes in the unified namespace
-     *
-     * @return array|bool
-     *
-     * @throws \Exception
+     * @return array
      */
-    public function getBackwardsCompatibilityMap()
+    protected function getBackwardsCompatibilityMap()
     {
-        $communityEditionSourcePath = $this->facts->getCommunityEditionSourcePath();
-        $backwardsCompatibilityClassMapFile = $communityEditionSourcePath . DIRECTORY_SEPARATOR .
-                                              'Core' . DIRECTORY_SEPARATOR .
-                                              'Autoload' . DIRECTORY_SEPARATOR .
-                                              'BackwardsCompatibilityClassMap.php';
-
-        if (!is_readable($backwardsCompatibilityClassMapFile)) {
-            throw new \OxidEsales\UnifiedNameSpaceGenerator\Exceptions\InvalidBackwardsCompatibilityClassMapException(
-                'Backwards compatibility class map file ' . $backwardsCompatibilityClassMapFile .
-                ' is not readable or does not exist',
-                static::ERROR_CODE_MISSING_BACKWARDS_COMPATIBILITY_CLASS_MAP
-            );
-        }
-
-        $backwardsCompatibilityClassMap =
-            include $backwardsCompatibilityClassMapFile;
-
-        if (!is_array($backwardsCompatibilityClassMap)) {
-            throw new \OxidEsales\UnifiedNameSpaceGenerator\Exceptions\InvalidBackwardsCompatibilityClassMapException(
-                'Backwards compatibility class map is not an array ',
-                static::ERROR_CODE_INVALID_BACKWARDS_COMPATIBILITY_CLASS_MAP
-            );
-        }
-
-        return array_flip($backwardsCompatibilityClassMap);
+        $backwardsCompatibilityClassMapProvider = new BackwardsCompatibilityClassMapProvider($this->facts);
+        return $backwardsCompatibilityClassMapProvider->getClassMap();
     }
 
     /**
@@ -427,7 +404,7 @@ class Generator
     protected function validateOutputDirectoryPermissions()
     {
         if (!is_dir($this->outputDirectory)) {
-            throw new \OxidEsales\UnifiedNameSpaceGenerator\Exceptions\OutputDirectoryValidationException (
+            throw new \OxidEsales\UnifiedNameSpaceGenerator\Exceptions\OutputDirectoryValidationException(
                 'The directory "' . $this->outputDirectory . '" where the class files have to be written to' .
                 ' does not exist. ' .
                 'Please create the directory "' . $this->outputDirectory . '" with write permissions for the user "' . get_current_user() . '" ' .
@@ -435,7 +412,7 @@ class Generator
                 static::ERROR_CODE_DIRECTORY_CREATION_ERROR
             );
         } elseif (!is_writable($this->outputDirectory)) {
-            throw new \OxidEsales\UnifiedNameSpaceGenerator\Exceptions\OutputDirectoryValidationException (
+            throw new \OxidEsales\UnifiedNameSpaceGenerator\Exceptions\OutputDirectoryValidationException(
                 'The directory "' . realpath($this->outputDirectory) . '" where the class files have to be written to' .
                 ' is not writable for user "' . get_current_user() . '". ' .
                 'Please fix the permissions on this directory ' .

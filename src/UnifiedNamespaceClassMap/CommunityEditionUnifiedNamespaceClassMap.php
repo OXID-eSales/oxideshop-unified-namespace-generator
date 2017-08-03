@@ -21,6 +21,8 @@
 
 namespace OxidEsales\UnifiedNameSpaceGenerator\UnifiedNamespaceClassMap;
 
+use OxidEsales\UnifiedNameSpaceGenerator\Exceptions\InvalidUnifiedNamespaceClassMapException;
+
 /**
  * Class CommunityEditionUnifiedNamespaceClassMap
  *
@@ -33,6 +35,8 @@ class CommunityEditionUnifiedNamespaceClassMap
 
     /** @var \OxidEsales\Facts\Facts */
     protected $facts = null;
+
+    protected $editionText = "OXID eShop Community Edition was chosen.";
 
     /**
      * @param \OxidEsales\Facts\Facts $facts
@@ -84,8 +88,9 @@ class CommunityEditionUnifiedNamespaceClassMap
         );
 
         if (!is_readable($fullPathToUnifiedNamespaceClassMapFile)) {
-            throw new \Exception(
-                'File ' . $fullPathToUnifiedNamespaceClassMapFile .
+            throw new InvalidUnifiedNamespaceClassMapException(
+                $this->editionText .
+                ' But the file ' . $fullPathToUnifiedNamespaceClassMapFile .
                 ' is not readable or does not exist',
                 \OxidEsales\UnifiedNameSpaceGenerator\Generator::ERROR_CODE_INVALID_UNIFIED_NAMESPACE_CLASS_MAP
             );
@@ -94,8 +99,9 @@ class CommunityEditionUnifiedNamespaceClassMap
         $unifiedNamespaceClassMap = include $fullPathToUnifiedNamespaceClassMapFile;
 
         if (!is_array($unifiedNamespaceClassMap)) {
-            throw new \Exception(
-                'Backwards compatibility class map is not an array ',
+            throw new InvalidUnifiedNamespaceClassMapException(
+                $this->editionText .
+                ' But the file ' . $fullPathToUnifiedNamespaceClassMapFile . ' is not an array.',
                 \OxidEsales\UnifiedNameSpaceGenerator\Generator::ERROR_CODE_INVALID_UNIFIED_NAMESPACE_CLASS_MAP
             );
         }

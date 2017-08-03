@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with OXID eSales Unified Namespaces file generation script. If not, see <http://www.gnu.org/licenses/>.
  *
- * @link      http://www.oxid-esales.com
+ * @link          http://www.oxid-esales.com
  * @copyright (C) OXID eSales AG 2003-2017
  */
 
@@ -142,7 +142,7 @@ class GeneratorTest extends \PHPUnit_Framework_TestCase
         $notExistingDirectory = $this->getOutputDirectory() . DIRECTORY_SEPARATOR . 'not_existing';
         $this->assertFalse(is_dir($notExistingDirectory));
 
-        $this->setExpectedExceptionOutputDirectoryValidationException($notExistingDirectory);
+        $this->setExpectedExceptionOutputDirectoryValidationException();
 
         $factsMock = $this->getFactsMock();
         $providerMock = $this->getUnifiedNameSpaceProviderMock($factsMock);
@@ -270,6 +270,7 @@ class GeneratorTest extends \PHPUnit_Framework_TestCase
     {
         $this->setExpectedException(\Exception::class, $exceptionMessage);
 
+        $this->copyTestDataIntoVirtualFileSystem('case_valid');
         $factsMock = $this->getFactsMock();
         $providerMock = $this->getUnifiedNameSpaceProviderMock($factsMock, $classMap);
 
@@ -291,41 +292,13 @@ class GeneratorTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * Test case that the BC map is missing
-     */
-    public function testGenerateBCMapNotAvailable()
-    {
-        $this->setExpectedException(\Exception::class, 'Backwards compatibility class map file this_leads_to_nothing');
-
-        $factsMock = $this->getFactsMock('CE', 'this_leads_to_nothing');
-        $providerMock = $this->getUnifiedNameSpaceProviderMock($factsMock);
-
-        $generator = $this->createGenerator($factsMock, $providerMock, $this->getVirtualOutputDirectory());
-        $generator->getBackwardsCompatibilityMap();
-    }
-
-    /**
-     * Test case that the BC map is no array.
-     */
-    public function testGenerateBCMapNotAnArray()
-    {
-        $this->setExpectedException(\Exception::class, 'Backwards compatibility class map is not an array');
-
-        $factsMock = $this->getFactsMock('CE', __DIR__ . DIRECTORY_SEPARATOR . 'testData' . DIRECTORY_SEPARATOR . 'case_invalid');
-        $provider = new \OxidEsales\UnifiedNameSpaceGenerator\UnifiedNameSpaceClassMapProvider($factsMock);
-
-        $generator = $this->createGenerator($factsMock, $provider, $this->getVirtualOutputDirectory());
-        $generator->getBackwardsCompatibilityMap();
-    }
-
-    /**
      * All is well case testing the full integration.
      * Writes files to actual filesystem.
      */
     public function testGenerateGeneratedClassesOk()
     {
+        $this->copyTestDataIntoVirtualFileSystem('case_valid');
         $outputDirectory = $this->getOutputDirectory();
-
         $factsMock = $this->getFactsMock();
         $providerMock = $this->getUnifiedNameSpaceProviderMock($factsMock);
 
@@ -350,8 +323,8 @@ class GeneratorTest extends \PHPUnit_Framework_TestCase
      */
     public function testGenerateGeneratedClassesOkMultipleRuns()
     {
+        $this->copyTestDataIntoVirtualFileSystem('case_valid');
         $outputDirectory = $this->getOutputDirectory();
-
         $factsMock = $this->getFactsMock('EE');
         $providerMock = $this->getUnifiedNameSpaceProviderMock($factsMock);
 
@@ -404,6 +377,7 @@ class GeneratorTest extends \PHPUnit_Framework_TestCase
             ]
         ];
 
+        $this->copyTestDataIntoVirtualFileSystem('case_valid');
         $outputDirectory = $this->getVirtualOutputDirectory(0777, $structure);
 
         $file = $outputDirectory . 'OxidEsales' . DIRECTORY_SEPARATOR . 'Eshop' . DIRECTORY_SEPARATOR . 'Application' .
@@ -428,6 +402,7 @@ class GeneratorTest extends \PHPUnit_Framework_TestCase
      */
     public function testSmartyCompileDirectoryNotAccessible()
     {
+        $this->copyTestDataIntoVirtualFileSystem('case_valid');
         $outputDirectory = $this->getOutputDirectory();
 
         $message = 'Smarty compile directory ' . \OxidEsales\UnifiedNameSpaceGenerator\tests\Integration\TestGenerator::SMARTY_COMPILE_DIR .
@@ -470,52 +445,6 @@ class GeneratorTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * Get path to virtual output directory.
-     *
-     * @param int   $permissions Directory permissions
-     * @param array $structure   Optional directory structure
-     *
-     * @return string
-     */
-    private function getVirtualOutputDirectory($permissions = 0777, $structure = null)
-    {
-        if (!is_array($structure)) {
-            $structure = ['generated' => []];
-        }
-
-        vfsStream::create($structure, $this->getVfsStreamDirectory());
-        $directory = $this->getVfsRootPath() . 'generated';
-        chmod($directory, $permissions);
-
-        return $directory . DIRECTORY_SEPARATOR;
-    }
-
-    /**
-     * @param string $edition  The OXID eShop Edition, which the facts should give back.
-     * @param string $basePath The path to the OXID eShop Community Edition.
-     *
-     * @return \OxidEsales\Facts\Facts
-     */
-    protected function getFactsMock($edition = 'CE', $basePath = '')
-    {
-        if (empty($basePath)) {
-            $basePath = $this->validBasePath;
-
-            $basePath = realpath($basePath);
-        }
-
-        /** @var \PHPUnit_Framework_MockObject_MockObject|\OxidEsales\Facts\Facts $mock */
-        $mock = $this->getMockBuilder(\OxidEsales\Facts\Facts::class)
-            ->disableOriginalConstructor()
-            ->setMethods(['getEdition', 'getCommunityEditionSourcePath'])
-            ->getMock();
-        $mock->method('getEdition')->willReturn($edition);
-        $mock->method('getCommunityEditionSourcePath')->willReturn($basePath);
-
-        return $mock;
-    }
-
-    /**
      * @param \OxidEsales\Facts\Facts $facts
      *
      * @return \OxidEsales\UnifiedNameSpaceGenerator\UnifiedNameSpaceClassMapProvider
@@ -535,31 +464,6 @@ class GeneratorTest extends \PHPUnit_Framework_TestCase
         $mock->expects($this->any())->method('getClassMap')->willReturn($classMap);
 
         return $mock;
-    }
-
-    /**
-     * Test helper.
-     * Getter for vfs stream directory.
-     *
-     * @return vfsStreamDirectory
-     */
-    private function getVfsStreamDirectory()
-    {
-        if (is_null($this->vfsStreamDirectory)) {
-            $this->vfsStreamDirectory = vfsStream::setup(self::ROOT_DIRECTORY);
-        }
-
-        return $this->vfsStreamDirectory;
-    }
-
-    /**
-     * Returns the root url. It should be treated as usual file path.
-     *
-     * @return string
-     */
-    private function getVfsRootPath()
-    {
-        return vfsStream::url(self::ROOT_DIRECTORY) . DIRECTORY_SEPARATOR;
     }
 
     /**
@@ -589,7 +493,7 @@ class GeneratorTest extends \PHPUnit_Framework_TestCase
      *
      * @param string $outputDirectory  The generator output directory.
      * @param string $relativeFilePath The relative path of the file.
-     *
+     *get
      * @return string The complete path of the file.
      */
     private function assertFileExistsAfterGeneration($outputDirectory, $relativeFilePath)
@@ -598,5 +502,100 @@ class GeneratorTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue(file_exists($resultFile), "File '$resultFile' does not exists after file generation!");
 
         return $resultFile;
+    }
+
+    /**
+     * Get path to virtual output directory and copy the give structure $structure inside
+     *
+     * @todo Code is duplicated in other test classes. Either move to separate class or use testing library
+     *
+     * @param int   $permissions Directory permissions
+     * @param array $structure   Optional directory structure to create inside output folder
+     *
+     * @return string
+     */
+    private function getVirtualOutputDirectory($permissions = 0777, $structure = null)
+    {
+        if (!is_array($structure)) {
+            $structure = ['generated' => []];
+        }
+
+        vfsStream::create($structure, $this->getVirtualFileSystem());
+        $directory = $this->getVirtualFilesystemRootPath() . 'generated';
+        chmod($directory, $permissions);
+
+        return $directory . DIRECTORY_SEPARATOR;
+    }
+
+    /**
+     * @todo Code is duplicated in other test classes. Either move to separate class or use testing library
+     *
+     * @param string $edition The OXID eShop Edition, which the facts should give back.
+     *
+     * @return \OxidEsales\Facts\Facts
+     */
+    private function getFactsMock($edition = 'CE')
+    {
+        /** @var \PHPUnit_Framework_MockObject_MockObject|\OxidEsales\Facts\Facts $mock */
+        $mock = $this->getMockBuilder(\OxidEsales\Facts\Facts::class)
+            ->disableOriginalConstructor()
+            ->setMethods(
+                [
+                    'getEdition',
+                    'getShopRootPath'
+                ]
+            )
+            ->getMock();
+        $mock->method('getEdition')->willReturn($edition);
+        $mock->method('getShopRootPath')->willReturn($this->getVirtualFilesystemRootPath());
+
+        return $mock;
+    }
+
+    /**
+     * @todo Code is duplicated in other test classes. Either move to separate class or use testing library
+     *
+     * @return vfsStreamDirectory
+     */
+    private function getVirtualFileSystem()
+    {
+        if (is_null($this->vfsStreamDirectory)) {
+            $this->vfsStreamDirectory = vfsStream::setup(self::ROOT_DIRECTORY);
+        }
+
+        return $this->vfsStreamDirectory;
+    }
+
+    /**
+     * @todo Code is duplicated in other test classes. Either move to separate class or use testing library
+     *
+     * @param string $testCaseDirectory The directory within the pysical directory testData you want to
+     *                                  load into the file system
+     */
+    private function copyTestDataIntoVirtualFileSystem($testCaseDirectory)
+    {
+        try {
+            $pathToTestData = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'testData' . DIRECTORY_SEPARATOR . $testCaseDirectory;
+            $virtualFileSystem = $this->getVirtualFileSystem();
+
+            vfsStream::copyFromFileSystem(
+                $pathToTestData,
+                $virtualFileSystem
+            );
+        } catch (\InvalidArgumentException $exception) {
+            $this->fail($exception->getMessage());
+        }
+    }
+
+    /**
+     * Returns the root url. It should be treated as usual file path.
+     *
+     * @todo Code is duplicated in other test classes. Either move to separate class or use testing library
+     *
+     * @return string
+     */
+    private function getVirtualFilesystemRootPath()
+    {
+        return vfsStream::url(self::ROOT_DIRECTORY) . DIRECTORY_SEPARATOR;
     }
 }

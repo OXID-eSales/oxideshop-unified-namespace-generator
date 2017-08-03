@@ -22,11 +22,11 @@
 namespace OxidEsales\UnifiedNameSpaceGenerator\Exceptions;
 
 /**
- * Class PermissionException
+ * Class InvalidUnifiedNamespaceClassMapException
  *
  * @package OxidEsales\UnifiedNameSpaceGenerator\Exceptions
  */
-class PermissionException extends \Exception
+class InvalidUnifiedNamespaceClassMapException extends \Exception
 {
 
 }

@@ -21,6 +21,11 @@
 
 namespace OxidEsales\UnifiedNameSpaceGenerator;
 
+use \OxidEsales\UnifiedNameSpaceGenerator\UnifiedNamespaceClassMap\CommunityEditionUnifiedNamespaceClassMap;
+use \OxidEsales\UnifiedNameSpaceGenerator\UnifiedNamespaceClassMap\ProfessionalEditionUnifiedNamespaceClassMap;
+use \OxidEsales\UnifiedNameSpaceGenerator\UnifiedNamespaceClassMap\EnterpriseEditionUnifiedNamespaceClassMap;
+use \OxidEsales\UnifiedNameSpaceGenerator\Exceptions\InvalidEditionException;
+
 /**
  * Provides a map of classes in the unified namespace to edition class names depending on the shop's current edition.
  */
@@ -53,30 +58,24 @@ class UnifiedNameSpaceClassMapProvider
         switch ($shopEdition) {
             case \OxidEsales\UnifiedNameSpaceGenerator\Generator::COMMUNITY_EDITION:
                 $unifiedNamespaceClassMap =
-                    new \OxidEsales\UnifiedNameSpaceGenerator\UnifiedNamespaceClassMap\CommunityEditionUnifiedNamespaceClassMap($this->facts);
+                    new CommunityEditionUnifiedNamespaceClassMap($this->facts);
                 break;
             case \OxidEsales\UnifiedNameSpaceGenerator\Generator::PROFESSIONAL_EDITION:
                 $unifiedNamespaceClassMap =
-                    new \OxidEsales\UnifiedNameSpaceGenerator\UnifiedNamespaceClassMap\ProfessionalEditionUnifiedNamespaceClassMap($this->facts);
+                    new ProfessionalEditionUnifiedNamespaceClassMap($this->facts);
                 break;
             case \OxidEsales\UnifiedNameSpaceGenerator\Generator::ENTERPRISE_EDITION:
                 $unifiedNamespaceClassMap =
-                    new \OxidEsales\UnifiedNameSpaceGenerator\UnifiedNamespaceClassMap\EnterpriseEditionUnifiedNamespaceClassMap($this->facts);
+                    new EnterpriseEditionUnifiedNamespaceClassMap($this->facts);
         }
 
-        if(is_null($unifiedNamespaceClassMap)){
-            throw new \InvalidArgumentException(
+        if (is_null($unifiedNamespaceClassMap)) {
+            throw new InvalidEditionException(
                 'The OXID eShop edition could not be detected. Be sure to setup your OXID eShop correctly.'
             );
         }
 
         $editionSpecificUnifiedNamespaceClassMap = $unifiedNamespaceClassMap->getClassMap();
-
-        if (empty($editionSpecificUnifiedNamespaceClassMap) || !is_array($editionSpecificUnifiedNamespaceClassMap)) {
-            throw new \InvalidArgumentException(
-                'Class map generation was not successful. Check all UnifiedNamespaceClass.php files of each edition.'
-            );
-        }
 
         return $editionSpecificUnifiedNamespaceClassMap;
     }
