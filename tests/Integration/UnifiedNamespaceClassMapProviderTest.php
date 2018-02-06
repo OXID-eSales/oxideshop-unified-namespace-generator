@@ -73,9 +73,39 @@ class UnifiedNamespaceClassMapProviderTest extends \PHPUnit_Framework_TestCase
     public function providerClassMapsAndEditions()
     {
         return [
+            'with extra map' => [
+                'editiion' => 'CE',
+                'extraMap' => [
+                    'OxidEsales\Eshop\ClassExistsOnlyInCommunityEdition' => 'Foo\ConcreteClass',
+                    'OxidEsales\Eshop\AbstractClassExistsInAllEditions' => 'Bar\AbstractClass',
+                ],
+                'expected' => [
+                    'OxidEsales\Eshop\ClassExistsOnlyInCommunityEdition'            => [
+                        'editionClassName' => '\Foo\ConcreteClass::class',
+                        'isAbstract'       => false,
+                        'isInterface'      => false
+                    ],
+                    'OxidEsales\Eshop\ClassExistsInCommunityAndProfessionalEdition' => [
+                        'editionClassName' => \OxidEsales\EshopCommunity\ClassExistsInCommunityAndProfessionalEdition::class,
+                        'isAbstract'       => false,
+                        'isInterface'      => false
+                    ],
+                    'OxidEsales\Eshop\ClassExistsInAllEditions'                     => [
+                        'editionClassName' => \OxidEsales\EshopCommunity\ClassExistsInAllEditions::class,
+                        'isAbstract'       => false,
+                        'isInterface'      => false
+                    ],
+                    'OxidEsales\Eshop\AbstractClassExistsInAllEditions'             => [
+                        'editionClassName' => '\Bar\AbstractClass::class',
+                        'isAbstract'       => true,
+                        'isInterface'      => false
+                    ]
+                ]
+            ],
             'ce_edition' => [
-                'CE',
-                [
+                'editiion' => 'CE',
+                'extraMap' => null,
+                'expected' => [
                     'OxidEsales\Eshop\ClassExistsOnlyInCommunityEdition'            => [
                         'editionClassName' => \OxidEsales\EshopCommunity\ClassExistsOnlyInCommunityEdition::class,
                         'isAbstract'       => false,
@@ -103,8 +133,9 @@ class UnifiedNamespaceClassMapProviderTest extends \PHPUnit_Framework_TestCase
                 ]
             ],
             'pe_edition' => [
-                'PE',
-                [
+                'editiion' => 'PE',
+                'extraMap' => null,
+                'expected' => [
                     'OxidEsales\Eshop\ClassExistsOnlyInCommunityEdition'            => [
                         'editionClassName' => \OxidEsales\EshopCommunity\ClassExistsOnlyInCommunityEdition::class,
                         'isAbstract'       => false,
@@ -132,8 +163,9 @@ class UnifiedNamespaceClassMapProviderTest extends \PHPUnit_Framework_TestCase
                 ]
             ],
             'ee_edition' => [
-                'EE',
-                [
+                'editiion' => 'EE',
+                'extraMap' => null,
+                'expected' => [
                     'OxidEsales\Eshop\ClassExistsOnlyInCommunityEdition'            => [
                         'editionClassName' => \OxidEsales\EshopCommunity\ClassExistsOnlyInCommunityEdition::class,
                         'isAbstract'       => false,
@@ -167,14 +199,15 @@ class UnifiedNamespaceClassMapProviderTest extends \PHPUnit_Framework_TestCase
      * @dataProvider providerClassMapsAndEditions
      *
      * @param string $edition
+     * @param array  $extraMap
      * @param array  $expectedClassMap
      */
-    public function testGetClassMapValid($edition, $expectedClassMap)
+    public function testGetClassMapValid($edition, $extraMap, $expectedClassMap)
     {
         $this->copyTestDataIntoVirtualFileSystem('case_valid');
         $factsMock = $this->getFactsMock($edition);
 
-        $unifiedNameSpaceClassMapProvider = new UnifiedNameSpaceClassMapProvider($factsMock);
+        $unifiedNameSpaceClassMapProvider = new UnifiedNameSpaceClassMapProvider($factsMock, $extraMap);
         $this->assertEquals(
             $expectedClassMap,
             $unifiedNameSpaceClassMapProvider->getClassMap(),
