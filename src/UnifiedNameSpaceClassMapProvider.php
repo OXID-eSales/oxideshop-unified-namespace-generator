@@ -86,7 +86,7 @@ class UnifiedNameSpaceClassMapProvider
             if (!isset($editionSpecificUnifiedNamespaceClassMap[$unifiedClass])) {
                 continue;
             }
-            $editionSpecificUnifiedNamespaceClassMap[$unifiedClass]['editionClassName'] = "\\{$editionClass}::class";
+            $editionSpecificUnifiedNamespaceClassMap[$unifiedClass]['editionClassName'] = "{$editionClass}::class";
         }
         return $editionSpecificUnifiedNamespaceClassMap;
     }
