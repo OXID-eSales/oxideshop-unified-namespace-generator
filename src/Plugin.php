@@ -92,8 +92,24 @@ class Plugin implements PluginInterface, EventSubscriberInterface
     protected function getGenerator()
     {
         $facts = new \OxidEsales\Facts\Facts();
-        $unifiedNameSpaceClassMapProvider = new \OxidEsales\UnifiedNameSpaceGenerator\UnifiedNameSpaceClassMapProvider($facts);
 
-        return new \OxidEsales\UnifiedNameSpaceGenerator\Generator($facts, $unifiedNameSpaceClassMapProvider);
+        return new \OxidEsales\UnifiedNameSpaceGenerator\Generator(
+            $facts,
+            new \OxidEsales\UnifiedNameSpaceGenerator\UnifiedNameSpaceClassMapProvider($facts, $this->getExtraMap())
+        );
+    }
+
+    /**
+     * @return string[]
+     */
+    protected function getExtraMap()
+    {
+        $maps = [];
+        foreach ($this->composer->getRepositoryManager()->getLocalRepository()->getPackages() as $package) {
+            if (($extra = $package->getExtra()) && isset($extra['oxideshop']['unified-namespace-map'])) {
+                $maps[] = (array)$extra['oxideshop']['unified-namespace-map'];
+            }
+        }
+        return array_merge(...$maps);
     }
 }
