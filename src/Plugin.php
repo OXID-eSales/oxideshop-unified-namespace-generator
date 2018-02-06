@@ -24,6 +24,7 @@ namespace OxidEsales\UnifiedNameSpaceGenerator;
 use Composer\Composer;
 use Composer\EventDispatcher\EventSubscriberInterface;
 use Composer\IO\IOInterface;
+use Composer\Package\Package;
 use Composer\Plugin\PluginInterface;
 use Composer\Script\ScriptEvents;
 
@@ -100,16 +101,20 @@ class Plugin implements PluginInterface, EventSubscriberInterface
     }
 
     /**
+     * Collect and merge "extra/oxideshop/unified-namespace-map" entries from composer files.
+     * The root library has the highest priority.
+     *
      * @return string[]
      */
     protected function getExtraMap()
     {
-        $maps = [];
-        foreach ($this->composer->getRepositoryManager()->getLocalRepository()->getPackages() as $package) {
+        $maps     = [];
+        $packages = $this->composer->getRepositoryManager()->getLocalRepository()->getPackages();
+        foreach (array_merge($packages, [$this->composer->getPackage()]) as $package) { /** @var Package $package */
             if (($extra = $package->getExtra()) && isset($extra['oxideshop']['unified-namespace-map'])) {
                 $maps[] = (array)$extra['oxideshop']['unified-namespace-map'];
             }
         }
-        return array_merge(...$maps);
+        return $maps ? array_merge(...$maps) : [];
     }
 }
