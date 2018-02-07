@@ -81,7 +81,7 @@ class UnifiedNamespaceClassMapProviderTest extends \PHPUnit_Framework_TestCase
                 ],
                 'expected' => [
                     'OxidEsales\Eshop\ClassExistsOnlyInCommunityEdition'            => [
-                        'editionClassName' => 'Foo\ConcreteClass::class',
+                        'editionClassName' => 'Foo\ConcreteClass',
                         'isAbstract'       => false,
                         'isInterface'      => false
                     ],
@@ -96,7 +96,7 @@ class UnifiedNamespaceClassMapProviderTest extends \PHPUnit_Framework_TestCase
                         'isInterface'      => false
                     ],
                     'OxidEsales\Eshop\AbstractClassExistsInAllEditions'             => [
-                        'editionClassName' => 'Bar\AbstractClass::class',
+                        'editionClassName' => 'Bar\AbstractClass',
                         'isAbstract'       => true,
                         'isInterface'      => false
                     ]
