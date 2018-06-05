@@ -182,6 +182,7 @@ class Generator
                 // Interfaces are abstract for Reflection too, here we want just abstract classes
                 'isAbstract'            => $editionClassDescription['isAbstract'],
                 'isInterface'           => $editionClassDescription['isInterface'],
+                'isDeprecated'          => $editionClassDescription['isDeprecated'],
                 'shortUnifiedClassName' => $shortUnifiedClassName,
                 'editionClassName'      => $editionClassDescription['editionClassName'],
             ];
@@ -325,7 +326,7 @@ class Generator
      */
     protected function validateEditionClassDescription(array $editionClassDescription)
     {
-        $expectedKeys = ['isAbstract', 'isInterface', 'editionClassName'];
+        $expectedKeys = ['isAbstract', 'isInterface', 'editionClassName', 'isDeprecated'];
         $message = 'Edition class description has a wrong layout. ' .
                    'It must be an non empty array with the following keys ' . implode(',', $expectedKeys) . ' ';
         $code = static::ERROR_CODE_INVALID_UNIFIED_NAMESPACE_CLASS_MAP_ENTRY;
