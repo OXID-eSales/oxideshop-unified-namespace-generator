@@ -1,14 +1,16 @@
 <?php
 
 return [
-    'OxidEsales\Eshop\ClassExistsInAllEditions'                     => [
+    'OxidEsales\Eshop\ClassExistsInAllEditions'         => [
         'editionClassName' => \OxidEsales\EshopEnterprise\ClassExistsInAllEditions::class,
         'isAbstract'       => false,
-        'isInterface'      => false
+        'isInterface'      => false,
+        'isDeprecated'     => false
     ],
-    'OxidEsales\Eshop\AbstractClassExistsInAllEditions'             => [
+    'OxidEsales\Eshop\AbstractClassExistsInAllEditions' => [
         'editionClassName' => \OxidEsales\EshopEnterprise\AbstractClassExistsInAllEditions::class,
         'isAbstract'       => true,
-        'isInterface'      => false
+        'isInterface'      => false,
+        'isDeprecated'     => false
     ],
 ];

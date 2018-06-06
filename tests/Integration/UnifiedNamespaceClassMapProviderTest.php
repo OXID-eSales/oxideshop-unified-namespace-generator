@@ -79,22 +79,26 @@ class UnifiedNamespaceClassMapProviderTest extends \PHPUnit_Framework_TestCase
                     'OxidEsales\Eshop\ClassExistsOnlyInCommunityEdition'            => [
                         'editionClassName' => \OxidEsales\EshopCommunity\ClassExistsOnlyInCommunityEdition::class,
                         'isAbstract'       => false,
-                        'isInterface'      => false
+                        'isInterface'      => false,
+                        'isDeprecated'     => false
                     ],
                     'OxidEsales\Eshop\ClassExistsInCommunityAndProfessionalEdition' => [
                         'editionClassName' => \OxidEsales\EshopCommunity\ClassExistsInCommunityAndProfessionalEdition::class,
                         'isAbstract'       => false,
-                        'isInterface'      => false
+                        'isInterface'      => false,
+                        'isDeprecated'     => false
                     ],
                     'OxidEsales\Eshop\ClassExistsInAllEditions'                     => [
                         'editionClassName' => \OxidEsales\EshopCommunity\ClassExistsInAllEditions::class,
                         'isAbstract'       => false,
-                        'isInterface'      => false
+                        'isInterface'      => false,
+                        'isDeprecated'     => false
                     ],
                     'OxidEsales\Eshop\AbstractClassExistsInAllEditions'             => [
                         'editionClassName' => \OxidEsales\EshopCommunity\AbstractClassExistsInAllEditions::class,
                         'isAbstract'       => true,
-                        'isInterface'      => false
+                        'isInterface'      => false,
+                        'isDeprecated'     => false
                     ]
                 ]
             ],
@@ -104,22 +108,26 @@ class UnifiedNamespaceClassMapProviderTest extends \PHPUnit_Framework_TestCase
                     'OxidEsales\Eshop\ClassExistsOnlyInCommunityEdition'            => [
                         'editionClassName' => \OxidEsales\EshopCommunity\ClassExistsOnlyInCommunityEdition::class,
                         'isAbstract'       => false,
-                        'isInterface'      => false
+                        'isInterface'      => false,
+                        'isDeprecated'     => false
                     ],
                     'OxidEsales\Eshop\ClassExistsInCommunityAndProfessionalEdition' => [
                         'editionClassName' => \OxidEsales\EshopProfessional\ClassExistsInCommunityAndProfessionalEdition::class,
                         'isAbstract'       => false,
-                        'isInterface'      => false
+                        'isInterface'      => false,
+                        'isDeprecated'     => false
                     ],
                     'OxidEsales\Eshop\ClassExistsInAllEditions'                     => [
                         'editionClassName' => \OxidEsales\EshopProfessional\ClassExistsInAllEditions::class,
                         'isAbstract'       => false,
-                        'isInterface'      => false
+                        'isInterface'      => false,
+                        'isDeprecated'     => false
                     ],
                     'OxidEsales\Eshop\AbstractClassExistsInAllEditions'             => [
                         'editionClassName' => \OxidEsales\EshopProfessional\AbstractClassExistsInAllEditions::class,
                         'isAbstract'       => true,
-                        'isInterface'      => false
+                        'isInterface'      => false,
+                        'isDeprecated'     => false
                     ],
                 ]
             ],
@@ -129,22 +137,26 @@ class UnifiedNamespaceClassMapProviderTest extends \PHPUnit_Framework_TestCase
                     'OxidEsales\Eshop\ClassExistsOnlyInCommunityEdition'            => [
                         'editionClassName' => \OxidEsales\EshopCommunity\ClassExistsOnlyInCommunityEdition::class,
                         'isAbstract'       => false,
-                        'isInterface'      => false
+                        'isInterface'      => false,
+                        'isDeprecated'     => false
                     ],
                     'OxidEsales\Eshop\ClassExistsInCommunityAndProfessionalEdition' => [
                         'editionClassName' => \OxidEsales\EshopProfessional\ClassExistsInCommunityAndProfessionalEdition::class,
                         'isAbstract'       => false,
-                        'isInterface'      => false
+                        'isInterface'      => false,
+                        'isDeprecated'     => false
                     ],
                     'OxidEsales\Eshop\ClassExistsInAllEditions'                     => [
                         'editionClassName' => \OxidEsales\EshopEnterprise\ClassExistsInAllEditions::class,
                         'isAbstract'       => false,
-                        'isInterface'      => false
+                        'isInterface'      => false,
+                        'isDeprecated'     => false
                     ],
                     'OxidEsales\Eshop\AbstractClassExistsInAllEditions'             => [
                         'editionClassName' => \OxidEsales\EshopEnterprise\AbstractClassExistsInAllEditions::class,
                         'isAbstract'       => true,
-                        'isInterface'      => false
+                        'isInterface'      => false,
+                        'isDeprecated'     => false
                     ],
                 ]
             ]
@@ -168,29 +180,6 @@ class UnifiedNamespaceClassMapProviderTest extends \PHPUnit_Framework_TestCase
             $unifiedNameSpaceClassMapProvider->getClassMap(),
             'The class map for edition ' . $edition . ' is not as expected'
         );
-    }
-
-    /**
-     * Get path to virtual output directory and copy the give structure $structure inside
-     *
-     * @todo Code is duplicated in other test classes. Either move to separate class or use testing library
-     *
-     * @param int   $permissions Directory permissions
-     * @param array $structure   Optional directory structure to create inside output folder
-     *
-     * @return string
-     */
-    private function getVirtualOutputDirectory($permissions = 0777, $structure = null)
-    {
-        if (!is_array($structure)) {
-            $structure = ['generated' => []];
-        }
-
-        vfsStream::create($structure, $this->getVirtualFileSystem());
-        $directory = $this->getVirtualFilesystemRootPath() . 'generated';
-        chmod($directory, $permissions);
-
-        return $directory . DIRECTORY_SEPARATOR;
     }
 
     /**

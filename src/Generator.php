@@ -339,7 +339,7 @@ class Generator
         sort($expectedKeys);
         sort($actualKeys);
         if ($expectedKeys != $actualKeys) {
-            $message .= ' Actual edition class description is ' . var_export($actualKeys, true);
+            $message .= ' Actual edition class description is ' . var_export($editionClassDescription, true);
             throw new \Exception($message, $code);
         }
     }

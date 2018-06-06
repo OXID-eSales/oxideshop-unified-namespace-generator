@@ -61,27 +61,32 @@ class GeneratorTest extends \PHPUnit_Framework_TestCase
         'OxidEsales\Eshop\Core\Contract\AbstractUpdatableFields'    => [
             'editionClassName' => \OxidEsales\EshopCommunity\Core\Contract\AbstractUpdatableFields::class,
             'isAbstract'       => true,
-            'isInterface'      => false
+            'isInterface'      => false,
+            'isDeprecated'     => false
         ],
         'OxidEsales\Eshop\Application\Model\Article'                => [
             'editionClassName' => \OxidEsales\EshopCommunity\Application\Model\Article::class,
             'isAbstract'       => false,
-            'isInterface'      => false
+            'isInterface'      => false,
+            'isDeprecated'     => true
         ],
         'OxidEsales\Eshop\Core\Contract\ClassNameResolverInterface' => [
             'editionClassName' => \OxidEsales\EshopCommunity\Core\Contract\ClassNameResolverInterface::class,
             'isAbstract'       => false,
-            'isInterface'      => true
+            'isInterface'      => true,
+            'isDeprecated'     => false
         ],
         'OxidEsales\Eshop\Core\FileSystem\FileSystem'               => [
             'editionClassName' => \OxidEsales\EshopCommunity\Core\FileSystem\FileSystem::class,
             'isAbstract'       => false,
-            'isInterface'      => false
+            'isInterface'      => false,
+            'isDeprecated'     => false
         ],
         'OxidEsales\Eshop\Core\Contract\IConfigurable'              => [
             'editionClassName' => \OxidEsales\EshopCommunity\Core\Contract\IConfigurable::class,
             'isAbstract'       => false,
-            'isInterface'      => true
+            'isInterface'      => true,
+            'isDeprecated'     => false
         ],
     ];
 
