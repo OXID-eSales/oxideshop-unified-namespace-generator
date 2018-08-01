@@ -83,22 +83,26 @@ class UnifiedNamespaceClassMapProviderTest extends \PHPUnit_Framework_TestCase
                     'OxidEsales\Eshop\ClassExistsOnlyInCommunityEdition'            => [
                         'editionClassName' => 'Foo\ConcreteClass',
                         'isAbstract'       => false,
-                        'isInterface'      => false
+                        'isInterface'      => false,
+                        'isDeprecated'     => false
                     ],
                     'OxidEsales\Eshop\ClassExistsInCommunityAndProfessionalEdition' => [
                         'editionClassName' => \OxidEsales\EshopCommunity\ClassExistsInCommunityAndProfessionalEdition::class,
                         'isAbstract'       => false,
-                        'isInterface'      => false
+                        'isInterface'      => false,
+                        'isDeprecated'     => false
                     ],
                     'OxidEsales\Eshop\ClassExistsInAllEditions'                     => [
                         'editionClassName' => \OxidEsales\EshopCommunity\ClassExistsInAllEditions::class,
                         'isAbstract'       => false,
-                        'isInterface'      => false
+                        'isInterface'      => false,
+                        'isDeprecated'     => false
                     ],
                     'OxidEsales\Eshop\AbstractClassExistsInAllEditions'             => [
                         'editionClassName' => 'Bar\AbstractClass',
                         'isAbstract'       => true,
-                        'isInterface'      => false
+                        'isInterface'      => false,
+                        'isDeprecated'     => false
                     ]
                 ]
             ],
