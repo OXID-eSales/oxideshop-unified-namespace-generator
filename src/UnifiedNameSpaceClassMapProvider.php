@@ -36,11 +36,18 @@ class UnifiedNameSpaceClassMapProvider
     private $facts = null;
 
     /**
-     * @param \OxidEsales\Facts\Facts $facts
+     * @var array
      */
-    public function __construct(\OxidEsales\Facts\Facts $facts)
+    private $extraMap;
+
+    /**
+     * @param \OxidEsales\Facts\Facts $facts
+     * @param array                   $extraMap overwrites editionClassName entries from the current oxid-shop edition
+     */
+    public function __construct(\OxidEsales\Facts\Facts $facts, array $extraMap = null)
     {
         $this->facts = $facts;
+        $this->extraMap = $extraMap;
     }
 
     /**
@@ -69,14 +76,18 @@ class UnifiedNameSpaceClassMapProvider
                     new EnterpriseEditionUnifiedNamespaceClassMap($this->facts);
         }
 
-        if (is_null($unifiedNamespaceClassMap)) {
+        if (!$unifiedNamespaceClassMap) {
             throw new InvalidEditionException(
                 'The OXID eShop edition could not be detected. Be sure to setup your OXID eShop correctly.'
             );
         }
-
         $editionSpecificUnifiedNamespaceClassMap = $unifiedNamespaceClassMap->getClassMap();
-
+        foreach ($this->extraMap ?: []as $unifiedClass => $editionClass) {
+            if (!isset($editionSpecificUnifiedNamespaceClassMap[$unifiedClass])) {
+                continue;
+            }
+            $editionSpecificUnifiedNamespaceClassMap[$unifiedClass]['editionClassName'] = $editionClass;
+        }
         return $editionSpecificUnifiedNamespaceClassMap;
     }
 }

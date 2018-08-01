@@ -22,8 +22,13 @@
   },
   "autoload": {
     "psr-4": {
-      "OxidEsales\\UnifiedNameSpaceGenerator\\": "./src",
+      "OxidEsales\\UnifiedNameSpaceGenerator\\": "src",
       "OxidEsales\\Eshop\\": "./generated/OxidEsales/Eshop"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "OxidEsales\\UnifiedNameSpaceGenerator\\tests\\": "tests"
     }
   },
   "extra": {
