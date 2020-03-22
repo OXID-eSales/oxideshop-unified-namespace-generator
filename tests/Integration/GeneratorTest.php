@@ -41,7 +41,7 @@ class TestGenerator extends \OxidEsales\UnifiedNameSpaceGenerator\Generator
  *
  * @package OxidEsales\UnifiedNameSpaceGenerator\tests
  */
-class GeneratorTest extends \PHPUnit_Framework_TestCase
+class GeneratorTest extends \PHPUnit\Framework\TestCase
 {
 
     const TEST_OUTPUT_DIR = __DIR__ . DIRECTORY_SEPARATOR . 'test_generated' . DIRECTORY_SEPARATOR;
@@ -114,7 +114,7 @@ class GeneratorTest extends \PHPUnit_Framework_TestCase
     /**
      * Fixture set up.
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
 
@@ -128,7 +128,7 @@ class GeneratorTest extends \PHPUnit_Framework_TestCase
     /**
      * Fixture tear down
      */
-    protected function tearDown()
+    protected function tearDown(): void
     {
         $this->removeTestResults();
 
@@ -207,7 +207,7 @@ class GeneratorTest extends \PHPUnit_Framework_TestCase
          */
         chmod($outputDirectory . $relativePath, $permissions);
 
-        $this->setExpectedException(\Symfony\Component\Filesystem\Exception\IOException::class);
+        $this->expectException(\Symfony\Component\Filesystem\Exception\IOException::class);
 
         $factsMock = $this->getFactsMock();
         $providerMock = $this->getUnifiedNameSpaceProviderMock($factsMock);
@@ -273,7 +273,7 @@ class GeneratorTest extends \PHPUnit_Framework_TestCase
      */
     public function testGenerateValidationErrors($classMap, $exceptionMessage)
     {
-        $this->setExpectedException(\Exception::class, $exceptionMessage);
+        $this->expectException(\Exception::class, $exceptionMessage);
 
         $this->copyTestDataIntoVirtualFileSystem('case_valid');
         $factsMock = $this->getFactsMock();
@@ -288,7 +288,7 @@ class GeneratorTest extends \PHPUnit_Framework_TestCase
      */
     public function testGenerateInvalidShopEdition()
     {
-        $this->setExpectedException(\Exception::class, 'Parameter $shopEdition has an unexpected value: "XX"');
+        $this->expectException(\Exception::class, 'Parameter $shopEdition has an unexpected value: "XX"');
 
         $factsMock = $this->getFactsMock('XX');
         $providerMock = $this->getUnifiedNameSpaceProviderMock($factsMock);
@@ -344,7 +344,7 @@ class GeneratorTest extends \PHPUnit_Framework_TestCase
             $actualFileContent = trim(file_get_contents($resultFile));
 
             $this->assertNotSame($expectedFileContent, $actualFileContent, "Expected and actual content of file '$name' are unexpectedly the same!");
-            $this->assertContains('OXID eShop EE', file_get_contents($resultFile));
+            $this->assertStringContainsString('OXID eShop EE', file_get_contents($resultFile));
         }
 
         // Now run it again but this time for CE.
@@ -389,7 +389,7 @@ class GeneratorTest extends \PHPUnit_Framework_TestCase
                 DIRECTORY_SEPARATOR . 'Model' . DIRECTORY_SEPARATOR . 'Article.php';
         chmod($file, 0444);
 
-        $this->setExpectedException(\OxidEsales\UnifiedNameSpaceGenerator\Exceptions\FileSystemCompatibilityException::class);
+        $this->expectException(\OxidEsales\UnifiedNameSpaceGenerator\Exceptions\FileSystemCompatibilityException::class);
 
         $factsMock = $this->getFactsMock();
         $providerMock = $this->getUnifiedNameSpaceProviderMock($factsMock);
@@ -412,7 +412,7 @@ class GeneratorTest extends \PHPUnit_Framework_TestCase
 
         $message = 'Smarty compile directory ' . \OxidEsales\UnifiedNameSpaceGenerator\tests\Integration\TestGenerator::SMARTY_COMPILE_DIR .
                    ' is not writable for user';
-        $this->setExpectedException(\Exception::class, $message);
+        $this->expectException(\Exception::class, $message);
 
         $factsMock = $this->getFactsMock();
         $providerMock = $this->getUnifiedNameSpaceProviderMock($factsMock);
@@ -460,12 +460,10 @@ class GeneratorTest extends \PHPUnit_Framework_TestCase
             $classMap = $this->classMapExample;
         }
 
-        /** @var \PHPUnit_Framework_MockObject_MockObject|\OxidEsales\UnifiedNameSpaceGenerator\UnifiedNameSpaceClassMapProvider $mock */
-        $mock = $this->getMock(
-            \OxidEsales\UnifiedNameSpaceGenerator\UnifiedNameSpaceClassMapProvider::class,
-            ['getClassMap'],
-            [$facts]
-        );
+        $mock = $this->getMockBuilder(\OxidEsales\UnifiedNameSpaceGenerator\UnifiedNameSpaceClassMapProvider::class)
+            ->disableOriginalConstructor()
+            ->setMethods(['getClassMap'])
+            ->getMock();
         $mock->expects($this->any())->method('getClassMap')->willReturn($classMap);
 
         return $mock;
@@ -490,7 +488,7 @@ class GeneratorTest extends \PHPUnit_Framework_TestCase
      */
     private function setExpectedExceptionOutputDirectoryValidationException()
     {
-        $this->setExpectedException(\OxidEsales\UnifiedNameSpaceGenerator\Exceptions\OutputDirectoryValidationException::class);
+        $this->expectException(\OxidEsales\UnifiedNameSpaceGenerator\Exceptions\OutputDirectoryValidationException::class);
     }
 
     /**

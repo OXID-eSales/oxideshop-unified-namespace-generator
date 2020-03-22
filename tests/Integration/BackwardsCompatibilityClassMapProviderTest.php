@@ -31,7 +31,7 @@ use org\bovigo\vfs\vfsStreamDirectory;
  *
  * @package OxidEsales\UnifiedNameSpaceGenerator\tests
  */
-class BackwardsCompatibilityClassMapProviderTest extends \PHPUnit_Framework_TestCase
+class BackwardsCompatibilityClassMapProviderTest extends \PHPUnit\Framework\TestCase
 {
 
     const ROOT_DIRECTORY = 'root';
@@ -46,7 +46,7 @@ class BackwardsCompatibilityClassMapProviderTest extends \PHPUnit_Framework_Test
      */
     public function testGetClassMapDoesNotFindClassMap()
     {
-        $this->setExpectedException(
+        $this->expectException(
             InvalidBackwardsCompatibilityClassMapException::class,
             '',
             BackwardsCompatibilityClassMapProvider::ERROR_CODE_MISSING_BACKWARDS_COMPATIBILITY_CLASS_MAP
@@ -64,7 +64,7 @@ class BackwardsCompatibilityClassMapProviderTest extends \PHPUnit_Framework_Test
      */
     public function testGetClassMapDoesNotFindFindArrayInClassMap()
     {
-        $this->setExpectedException(
+        $this->expectException(
             InvalidBackwardsCompatibilityClassMapException::class,
             '',
             BackwardsCompatibilityClassMapProvider::ERROR_CODE_INVALID_BACKWARDS_COMPATIBILITY_CLASS_MAP

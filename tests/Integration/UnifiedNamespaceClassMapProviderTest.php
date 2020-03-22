@@ -31,7 +31,7 @@ use org\bovigo\vfs\vfsStreamDirectory;
  *
  * @package OxidEsales\UnifiedNameSpaceGenerator\tests
  */
-class UnifiedNamespaceClassMapProviderTest extends \PHPUnit_Framework_TestCase
+class UnifiedNamespaceClassMapProviderTest extends \PHPUnit\Framework\TestCase
 {
 
     const ROOT_DIRECTORY = 'root';
@@ -46,7 +46,7 @@ class UnifiedNamespaceClassMapProviderTest extends \PHPUnit_Framework_TestCase
      */
     public function testGetClassMapMapNotAvailable()
     {
-        $this->setExpectedException(InvalidUnifiedNamespaceClassMapException::class);
+        $this->expectException(InvalidUnifiedNamespaceClassMapException::class);
 
         $this->copyTestDataIntoVirtualFileSystem('case_noBackwardsCompatibilityMap');
         $factsMock = $this->getFactsMock('CE');
@@ -59,7 +59,7 @@ class UnifiedNamespaceClassMapProviderTest extends \PHPUnit_Framework_TestCase
      */
     public function testGetClassMapBCMapNotAnArray()
     {
-        $this->setExpectedException(InvalidUnifiedNamespaceClassMapException::class);
+        $this->expectException(InvalidUnifiedNamespaceClassMapException::class);
 
         $this->copyTestDataIntoVirtualFileSystem('case_invalid');
         $factsMock = $this->getFactsMock('CE');
