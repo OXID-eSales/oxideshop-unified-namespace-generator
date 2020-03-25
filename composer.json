@@ -13,6 +13,7 @@
     "smarty/smarty": "^v2.6.30",
     "oxid-esales/oxideshop-facts": "^2.0.0",
     "composer-plugin-api": "^1.1.0",
+    "composer/composer": "^1.0",
     "symfony/filesystem": "^3.3"
   },
   "require-dev": {
