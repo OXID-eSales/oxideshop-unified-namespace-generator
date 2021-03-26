@@ -9,7 +9,6 @@
   ],
   "prefer-stable": true,
   "require": {
-    "php": "^7.3",
     "smarty/smarty": "^v2.6.30",
     "oxid-esales/oxideshop-facts": "dev-master",
     "composer-plugin-api": "^1.0 || ^2.0",
