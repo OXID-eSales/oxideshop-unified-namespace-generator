@@ -20,5 +20,5 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Ignore PhpStorm and Composer working files [PR-3](https://github.com/OXID-eSales/oxideshop-unified-namespace-generator/pull/3)
 - Exclude non-essential files from dist package [PR-2](https://github.com/OXID-eSales/oxideshop-unified-namespace-generator/pull/2)
 
-[2.1.0]: https://github.com/OXID-eSales/oxideshop-unified-namespace-generator/compare/v2.0.1...2.1.0
+[2.1.0]: https://github.com/OXID-eSales/oxideshop-unified-namespace-generator/compare/v2.0.1...v2.1.0
 [2.0.1]: https://github.com/OXID-eSales/oxideshop-unified-namespace-generator/compare/v2.0.0...v2.0.1
