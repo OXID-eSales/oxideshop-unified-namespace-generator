@@ -10,7 +10,7 @@
   "prefer-stable": true,
   "require": {
     "smarty/smarty": "^v2.6.30",
-    "oxid-esales/oxideshop-facts": "^3.0.0",
+    "oxid-esales/oxideshop-facts": "*",
     "composer-plugin-api": "^1.0 || ^2.0",
     "composer/composer": "^1.0 || ^2.0",
     "symfony/filesystem": "^5.0.4"
