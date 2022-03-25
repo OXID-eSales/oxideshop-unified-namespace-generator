@@ -4,16 +4,16 @@
   "license": "GPL-3.0-only",
   "type": "composer-plugin",
   "require": {
-    "composer-plugin-api": "^1.0 || ^2.0",
-    "composer/composer": "^1.0 || ^2.0",
+    "composer-plugin-api": ">=2.0",
+    "composer/composer": ">=2.0",
     "oxid-esales/oxideshop-facts": "*",
     "smarty/smarty": "^v2.6.30",
-    "symfony/filesystem": "^5.0.4"
+    "symfony/filesystem": "*"
   },
   "require-dev": {
     "mikey179/vfsstream": "^1.6",
     "phpunit/phpunit": "^9",
-    "symfony/yaml": "^v5.0.5"
+    "symfony/yaml": "*"
   },
   "minimum-stability": "dev",
   "prefer-stable": true,

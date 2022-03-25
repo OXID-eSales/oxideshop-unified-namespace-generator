@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [v4.0.0] - Unreleased
+
+### Removed
+- Composer v1 support
+
 ## [v3.0.0] - 2021-06-10
 
 ### Changed
