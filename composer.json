@@ -7,7 +7,7 @@
     "composer-plugin-api": ">=2.0",
     "composer/composer": ">=2.0",
     "oxid-esales/oxideshop-facts": "*",
-    "smarty/smarty": "^v2.6.30",
+    "smarty/smarty": "*",
     "symfony/filesystem": "*"
   },
   "require-dev": {
