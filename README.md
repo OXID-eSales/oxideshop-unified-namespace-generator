@@ -1,7 +1,5 @@
 # Unified Namespace Generator
 
-[![Build Status](https://travis-ci.org/OXID-eSales/oxideshop-unified-namespace-generator.svg?branch=master)](https://travis-ci.org/OXID-eSales/oxideshop-unified-namespace-generator)
-
 An OXID eShop related tool to generate class files in the so called _unified namespace_.
 This tools implements also a composer plugin, but can also be executed as a
   standalone script like this
