@@ -1,7 +1,7 @@
 {
   "name": "oxid-esales/oxideshop-unified-namespace-generator",
   "description": "OXID eShop related utility, which generates edition-specific class files for the 'unified namespace'",
-  "license": "GPL-3.0-only",
+  "license": "proprietary",
   "type": "composer-plugin",
   "require": {
     "composer-plugin-api": ">=2.0",
