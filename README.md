@@ -9,13 +9,6 @@ This tools implements also a composer plugin, but can also be executed as a
 
 See also [Documentation on readthedocs.io](http://oxid-eshop-developer-documentation.readthedocs.io/en/latest/oxid_components/unified_namespace_generator.html)
 
-Branch Compatibility
---------------------
-
-* master branch is compatible with OXID eShop compilation master
-* b-6.3.x branch is compatible with OXID eShop compilation 6.3.x
-* b-1.x branch is compatible with OXID eShop compilation 6.2.x
-
 ## Bugs and Issues
 
 If you experience any bugs or issues, please report them in the section **OXID eShop (all versions)** of https://bugs.oxid-esales.com.
