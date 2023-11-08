@@ -1,4 +1,6 @@
-{{if $shopEdition == 'CE'}}
+<?php
+if ($shopEdition === 'CE') {
+?>
 /**
  * This file is part of OXID eShop Community Edition.
  *
@@ -19,7 +21,9 @@
  * @copyright (C) OXID eSales AG 2003-2017
  * @version   OXID eShop CE
  */
-{{elseif $shopEdition == 'PE'}}
+<?php
+} elseif ($shopEdition === 'PE') {
+?>
 /**
  * This Software is the property of OXID eSales and is protected
  * by copyright law - it is NOT Freeware.
@@ -32,7 +36,9 @@
  * @copyright (C) OXID eSales AG 2003-2017
  * @version   OXID eShop PE
  */
-{{elseif $shopEdition == 'EE'}}
+<?php
+} elseif ($shopEdition === 'EE') {
+?>
 /**
  * This Software is the property of OXID eSales and is protected
  * by copyright law - it is NOT Freeware.
@@ -45,4 +51,6 @@
  * @copyright (C) OXID eSales AG 2003-2017
  * @version   OXID eShop EE
  */
-{{/if}}
+<?php
+}
+?>

@@ -1,23 +1,11 @@
 <?php
+
 /**
- * This file is part of OXID eSales Unified Namespaces file generation script.
- *
- * OXID eSales Unified Namespaces file generation is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * OXID eSales Unified Namespaces file generation script is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with OXID eSales Unified Namespaces file generation script. If not, see <http://www.gnu.org/licenses/>.
- *
- * @link          http://www.oxid-esales.com
- * @copyright (C) OXID eSales AG 2003-2017
+ * Copyright © OXID eSales AG. All rights reserved.
+ * See LICENSE file for license details.
  */
+
+declare(strict_types=1);
 
 namespace OxidEsales\UnifiedNameSpaceGenerator;
 
@@ -26,38 +14,24 @@ use Composer\EventDispatcher\EventSubscriberInterface;
 use Composer\IO\IOInterface;
 use Composer\Plugin\PluginInterface;
 use Composer\Script\ScriptEvents;
+use http\Exception\BadMethodCallException;
+use OxidEsales\Facts\Facts;
 
 /**
  * The composer plugin entry point class.
  */
 class Plugin implements PluginInterface, EventSubscriberInterface
 {
+    protected Composer $composer;
+    protected IOInterface $io;
 
-    /** @type Composer */
-    protected $composer;
-
-    /** @type IOInterface */
-    protected $io;
-
-    /**
-     * The activation method is called when the plugin is activated.
-     *
-     * @param Composer    $composer
-     * @param IOInterface $io
-     */
-    public function activate(Composer $composer, IOInterface $io)
+    public function activate(Composer $composer, IOInterface $io): void
     {
-        /** composer and io properties are assgned for convenience */
         $this->composer = $composer;
         $this->io = $io;
     }
 
-    /**
-     * Subscribe this plugin to the wished composer events, with the given callback.
-     *
-     * @return array The composer events on which this plugin should fire.
-     */
-    public static function getSubscribedEvents()
+    public static function getSubscribedEvents(): array
     {
         return array(
             ScriptEvents::POST_INSTALL_CMD => 'callback',
@@ -65,10 +39,7 @@ class Plugin implements PluginInterface, EventSubscriberInterface
         );
     }
 
-    /**
-     * This callback is called, when the wished composer events are fired.
-     */
-    public function callback()
+    public function callback(): void
     {
         $generator = $this->getGenerator();
         try {
@@ -84,17 +55,12 @@ class Plugin implements PluginInterface, EventSubscriberInterface
         }
     }
 
-    /**
-     * Create the Unified Namespace Generator object.
-     *
-     * @return \OxidEsales\UnifiedNameSpaceGenerator\Generator
-     */
-    protected function getGenerator()
+    protected function getGenerator(): Generator
     {
-        $facts = new \OxidEsales\Facts\Facts();
-        $unifiedNameSpaceClassMapProvider = new \OxidEsales\UnifiedNameSpaceGenerator\UnifiedNameSpaceClassMapProvider($facts);
+        $facts = new Facts();
+        $unifiedNameSpaceClassMapProvider = new UnifiedNameSpaceClassMapProvider($facts);
 
-        return new \OxidEsales\UnifiedNameSpaceGenerator\Generator($facts, $unifiedNameSpaceClassMapProvider);
+        return new Generator($facts, $unifiedNameSpaceClassMapProvider);
     }
 
     public function deactivate(Composer $composer, IOInterface $io)

@@ -1,5 +1,10 @@
 # Change Log for OXID eSales Unified Namespace Generator
 
+## v5.0.0 - Unreleased
+
+### Removed
+- Smarty template engine support
+
 ## v4.1.0 - 2023-04-19
 
 ### Changed

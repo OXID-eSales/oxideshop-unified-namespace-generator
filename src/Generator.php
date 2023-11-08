@@ -1,143 +1,66 @@
 <?php
+
 /**
- * This file is part of OXID eSales Unified Namespaces file generation script.
- *
- * OXID eSales Unified Namespaces file generation is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * OXID eSales Unified Namespaces file generation script is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with OXID eSales Unified Namespaces file generation script. If not, see <http://www.gnu.org/licenses/>.
- *
- * @link          http://www.oxid-esales.com
- * @copyright (C) OXID eSales AG 2003-2017
+ * Copyright © OXID eSales AG. All rights reserved.
+ * See LICENSE file for license details.
  */
+
+declare(strict_types=1);
 
 namespace OxidEsales\UnifiedNameSpaceGenerator;
 
-/**
- * Edition specific class file generator
- *
- * @package OxidEsales\UnifiedNameSpaceGenerator
- */
+use FilesystemIterator;
+use OxidEsales\Facts\Edition\EditionSelector;
+use OxidEsales\Facts\Facts;
+use OxidEsales\UnifiedNameSpaceGenerator\Exceptions\OutputDirectoryValidationException;
+use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\Templating\Loader\FilesystemLoader;
+use Symfony\Component\Templating\PhpEngine;
+use Symfony\Component\Templating\TemplateNameParser;
+use Symfony\Component\Filesystem\Path;
+
 class Generator
 {
-
-    /**
-     * The root directory, where the class files will be written to.
-     *
-     * IMPORTANT: The output directory has to be kept in sync with composer.json.
-     */
-    protected $outputDirectory = '';
-
-
-    protected $fileSystem = null;
-
-    const COMMUNITY_EDITION = \OxidEsales\Facts\Edition\EditionSelector::COMMUNITY;
-    const PROFESSIONAL_EDITION = \OxidEsales\Facts\Edition\EditionSelector::PROFESSIONAL;
-    const ENTERPRISE_EDITION = \OxidEsales\Facts\Edition\EditionSelector::ENTERPRISE;
-    const SMARTY_COMPILE_DIR = __DIR__ . '' . DIRECTORY_SEPARATOR . 'smarty' . DIRECTORY_SEPARATOR . 'templates_c' . DIRECTORY_SEPARATOR;
-    const ERROR_CODE_FILE_DELETION_ERROR = 1;
-    const ERROR_CODE_DIRECTORY_DELETION_ERROR = 2;
-    const ERROR_CODE_DIRECTORY_CREATION_ERROR = 3;
-    const ERROR_CODE_FILE_CREATION_ERROR = 4;
-    const ERROR_CODE_INVALID_UNIFIED_NAMESPACE_CLASS_MAP = 6;
-    const ERROR_CODE_INVALID_UNIFIED_NAMESPACE_CLASS_MAP_ENTRY = 8;
-    const ERROR_CODE_INVALID_UNIFIED_CLASS_NAME = 9;
-    const ERROR_CODE_INVALID_UNIFIED_NAMESPACE = 10;
-    const ERROR_CODE_INVALID_SHOP_EDITION = 11;
-    const ERROR_CODE_NO_UNIFIED_NAMESPACE_FOUND = 12;
-    const ERROR_CODE_SMARTY_COMPILE_DIR_PERMISSIONS = 13;
-    const ERROR_CODE_DIRECTORY_DELETION_TIMING_ERROR = 14;
-
-    /** @var string OXID eShop edition */
-    private $shopEdition = '';
-
-    /** @var \OxidEsales\Facts\Facts|null */
-    private $facts = null;
-
-    /** @var \OxidEsales\UnifiedNameSpaceGenerator\UnifiedNameSpaceClassMapProvider|null */
-    private $unifiedNameSpaceClassMapProvider = null;
-
-    /**
-     * Generator constructor
-     *
-     * @param \OxidEsales\Facts\Facts          $facts
-     * @param UnifiedNameSpaceClassMapProvider $unifiedNameSpaceClassMapProvider
-     * @param string                           $outputDirectory
-     */
     public function __construct(
-        \OxidEsales\Facts\Facts $facts,
-        \OxidEsales\UnifiedNameSpaceGenerator\UnifiedNameSpaceClassMapProvider $unifiedNameSpaceClassMapProvider,
-        $outputDirectory = __DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'generated' . DIRECTORY_SEPARATOR
+        private readonly Facts $facts,
+        private readonly UnifiedNameSpaceClassMapProvider $unifiedNameSpaceClassMapProvider,
+        //phpcs:disable
+        private readonly string $outputDirectory = __DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'generated' . DIRECTORY_SEPARATOR,
+        private readonly string $templateDir = __DIR__ . DIRECTORY_SEPARATOR . 'templates' . DIRECTORY_SEPARATOR,
+        private string $shopEdition = '',
+        protected readonly string $communityEdition = EditionSelector::COMMUNITY,
+        protected readonly string $professionalEdition = EditionSelector::PROFESSIONAL,
+        protected readonly string $enterpriseEdition = EditionSelector::ENTERPRISE,
+        private readonly Filesystem $fileSystem = new Filesystem(),
     ) {
-        $this->facts = $facts;
-        $this->unifiedNameSpaceClassMapProvider = $unifiedNameSpaceClassMapProvider;
-
-        /** outputDirectory must not be modified after object construction */
-        $this->outputDirectory = $outputDirectory;
         $this->validateOutputDirectoryPermissions();
 
-        /** shopEdition must not be modified after object construction */
         $this->shopEdition = $facts->getEdition();
         $this->validateShopEdition($this->shopEdition);
-
-        $this->fileSystem = new \Symfony\Component\Filesystem\Filesystem();
     }
 
-    /**
-     * Delete the generated contents of the output directory
-     *
-     * @throws \Symfony\Component\Filesystem\Exception\IOException
-     */
-    public function cleanupOutputDirectory()
+    public function cleanupOutputDirectory(): void
     {
-        $directoryIterator = new \RecursiveDirectoryIterator($this->outputDirectory, \RecursiveDirectoryIterator::SKIP_DOTS);
-
-        /**
-         * Items, which must not be deleted have to be skipped during the directory iteration
-         *
-         * @param \SplFileInfo $current
-         * @return bool
-         */
-        $filterCallback = function (\SplFileInfo $current) {
-            $skipItem = false === strpos($current->getFilename(), '.gitkeep') ? true : false;
-            return $skipItem;
-        };
-
-        $filteredDirectoryIterator = new \RecursiveCallbackFilterIterator($directoryIterator, $filterCallback);
-        $items = new \RecursiveIteratorIterator(
-            $filteredDirectoryIterator,
-            \RecursiveIteratorIterator::CHILD_FIRST
+        $directoryIterator = new \RecursiveDirectoryIterator(
+            $this->outputDirectory,
+            FilesystemIterator::SKIP_DOTS
         );
 
-        $this->fileSystem->remove($items);
+        foreach ($directoryIterator as $current) {
+            if (!str_contains($current->getFilename(), '.gitkeep')) {
+                $this->fileSystem->remove($current->getPathname());
+            }
+        }
     }
 
-    /**
-     * Generate class files in the unified namespaces for the currently installed edition of OXID eShop
-     */
-    public function generate()
+    public function generate(): void
     {
         $classMap = $this->unifiedNameSpaceClassMapProvider->getClassMap();
 
         $this->generateClassFiles($classMap);
     }
 
-    /**
-     * Generate class files for a given class map
-     *
-     * @param array $classMap Class map for the given edition
-     *
-     * @throws \Exception
-     */
-    protected function generateClassFiles(array $classMap)
+    protected function generateClassFiles(array $classMap): void
     {
         $backwardsCompatibilityMap = $this->getBackwardsCompatibilityMap();
 
@@ -149,23 +72,13 @@ class Generator
         }
     }
 
-    /**
-     * @return array
-     */
-    protected function getBackwardsCompatibilityMap()
+    protected function getBackwardsCompatibilityMap(): array
     {
         $backwardsCompatibilityClassMapProvider = new BackwardsCompatibilityClassMapProvider($this->facts);
         return $backwardsCompatibilityClassMapProvider->getClassMap();
     }
 
-    /**
-     * Return a map of sub-namespaces and their corresponding classes including metadata
-     *
-     * @param array $classMap
-     *
-     * @return array
-     */
-    protected function getUnifiedNamespaceArray(array $classMap)
+    protected function getUnifiedNamespaceArray(array $classMap): array
     {
         $unifiedNameSpace = [];
 
@@ -191,28 +104,22 @@ class Generator
         return $unifiedNameSpace;
     }
 
-    /**
-     * Delegate rendering of the contents and writing the class files for a given sub-namespace
-     *
-     * @param string $unifiedSubNamespace       A given unified sub-namespace
-     * @param array  $editionClassDescriptions  Holds all corresponding edition class descriptions
-     * @param array  $backwardsCompatibilityMap A map of backwards compatible classes to classes in the unified namespace
-     *
-     * @throws \Exception
-     */
-    protected function buildSubNamespace($unifiedSubNamespace, array $editionClassDescriptions, array $backwardsCompatibilityMap)
-    {
-        $unifiedSubNamespacePath = $this->createUnifiedNamespaceSubDirectory($unifiedSubNamespace);
+    protected function buildSubNamespace(
+        string $unifiedSubNamespace,
+        array $editionClassDescriptions,
+        array $backwardsCompatibilityMap
+    ): void {
+        $subNamespacePath = $this->createUnifiedNamespaceSubDirectory($unifiedSubNamespace);
 
         foreach ($editionClassDescriptions as $editionClassDescription) {
-            $filePath = $unifiedSubNamespacePath . '/' . $editionClassDescription['shortUnifiedClassName'] . '.php';
-            $fullyQualifiedUnifiedClass = '\\' . trim($unifiedSubNamespace . '\\' . $editionClassDescription['shortUnifiedClassName'], '\\');
+            $shortUnifiedClassName = $editionClassDescription['shortUnifiedClassName'];
+            $filePath = Path::join($subNamespacePath, $shortUnifiedClassName . '.php');
+            $fullyQualifiedUnifiedClass = '\\' . trim($unifiedSubNamespace . '\\' . $shortUnifiedClassName, '\\');
 
-            $backwardsCompatibleClass = null;
-            $backwardsCompatibilityMapIndex = trim($fullyQualifiedUnifiedClass, '\\');
-            if (array_key_exists($backwardsCompatibilityMapIndex, $backwardsCompatibilityMap)) {
-                $backwardsCompatibleClass = $backwardsCompatibilityMap[$backwardsCompatibilityMapIndex];
-            }
+            $backwardsCompatibleClass = $this->getBackwardsCompatibleClass(
+                $fullyQualifiedUnifiedClass,
+                $backwardsCompatibilityMap
+            );
 
             $content = $this->renderContent(
                 $unifiedSubNamespace,
@@ -225,114 +132,96 @@ class Generator
         }
     }
 
-    /**
-     * Delegate rendering and return the content of a given class file in the unified namespace
-     *
-     * @param string $unifiedSubNamespace        A given unified sub-namespace
-     * @param array  $editionClassDescription    Holds the description of a edition class
-     * @param string $fullyQualifiedUnifiedClass Fully qualified name of the edition class
-     * @param string $backwardsCompatibleClass   Class name of the corresponding backwards compatible class
-     *
-     * @return string
-     */
-    protected function renderContent($unifiedSubNamespace, $editionClassDescription, $fullyQualifiedUnifiedClass, $backwardsCompatibleClass)
+    private function getBackwardsCompatibleClass(
+        string $fullyQualifiedUnifiedClass,
+        array $backwardsCompatibilityMap
+    ): ?string
     {
-        $smarty = $this->getSmarty();
+        $backwardsCompatibilityMapIndex = trim($fullyQualifiedUnifiedClass, '\\');
 
-        $smarty->assign('shopEdition', $this->shopEdition);
-        $smarty->assign('class', $editionClassDescription);
-        $smarty->assign('namespace', $unifiedSubNamespace);
-        $smarty->assign('fullyQualifiedUnifiedClass', $fullyQualifiedUnifiedClass);
-        $smarty->assign('backwardsCompatibleClass', $backwardsCompatibleClass);
-
-        return $smarty->fetch('class_file_template.tpl');
+        return $backwardsCompatibilityMap[$backwardsCompatibilityMapIndex] ?? null;
     }
 
-    /**
-     * Write a given content to a given file path
-     *
-     * @param string $filePath Path to the class file
-     * @param string $content  Content of the class file
-     *
-     * @throws \Exception
-     */
-    protected function writeFile($filePath, $content)
+    protected function renderContent(
+        string $unifiedSubNamespace,
+        array $editionClassDescription,
+        string $fullyQualifiedUnifiedClass,
+        ?string $backwardsCompatibleClass
+    ): string {
+        $templating = $this->getTemplatingEngine();
+
+        return $templating->render('class_file_template.php', [
+            'shopEdition' => $this->shopEdition,
+            'class' => $editionClassDescription,
+            'namespace' => $unifiedSubNamespace,
+            'fullyQualifiedUnifiedClass' => $fullyQualifiedUnifiedClass,
+            'backwardsCompatibleClass' => $backwardsCompatibleClass,
+        ]);
+    }
+
+    protected function writeFile(string $filePath, string $content): void
     {
         $this->validateOutputDirectoryPermissions();
 
         $currentDirectory = dirname($filePath);
         if (!is_writable($currentDirectory)) {
             throw new \OxidEsales\UnifiedNameSpaceGenerator\Exceptions\PermissionException(
-                'Could not create file ' . $filePath . ' ' .
-                'The directory ' . $currentDirectory . ' is not writable for user "' . get_current_user() . '". ' .
-                'Please fix the permissions on this directory and run this script again.',
-                static::ERROR_CODE_FILE_CREATION_ERROR
+                sprintf(
+                    'Could not create file %s. The directory %s is not writable for user "%s".' .
+                    'Please fix the permissions on this directory and run this script again.',
+                    $filePath,
+                    $currentDirectory,
+                    get_current_user()
+                ),
+                ErrorEnum::CODE_FILE_CREATION_ERROR->value
             );
         }
 
         $fileHandle = fopen($filePath, 'wb');
         if (!$fileHandle) {
             throw new \OxidEsales\UnifiedNameSpaceGenerator\Exceptions\FileSystemCompatibilityException(
-                'Could not open file file handle for ' . $filePath . ' ' .
-                'There might be a problem with your file system. Try to solve this problem and run this script again.',
-                static::ERROR_CODE_FILE_CREATION_ERROR
+                sprintf(
+                    'Could not open file handle for %s. There might be a problem with your file system.' .
+                    'Try to solve this problem and run this script again.',
+                    $filePath
+                ),
+                ErrorEnum::CODE_FILE_CREATION_ERROR->value
             );
         }
 
         $result = fwrite($fileHandle, $content);
-        if (false === $result) {
-            fclose($fileHandle);
-            throw new \Exception(
-                'Could not create file ' . $filePath,
-                static::ERROR_CODE_FILE_CREATION_ERROR
-            );
-        }
-        if (0 === $result) {
-            fclose($fileHandle);
-            throw new \Exception(
-                'Created empty file ' . $filePath,
-                static::ERROR_CODE_FILE_CREATION_ERROR
-            );
-        }
         fclose($fileHandle);
+        if ($result === false) {
+            throw new \Exception(
+                sprintf('Could not create file %s', $filePath)
+            );
+        }
+        if ($result === 0) {
+            throw new \Exception(
+                sprintf('Created empty file %s', $filePath),
+                ErrorEnum::CODE_FILE_CREATION_ERROR->value
+            );
+        }
     }
 
-    /**
-     * Validate the name of a unified sub-namespace
-     *
-     * @param string $unifiedSubNamespace        Name of the sub-namespace
-     * @param string $fullyQualifiedUnifiedClass Full qualified name of class, where the namespace should have been
-     *                                           extracted from
-     *
-     * @throws \Exception
-     */
-    protected function validateUnifiedNamespace($unifiedSubNamespace, $fullyQualifiedUnifiedClass)
+    protected function validateUnifiedNamespace(string $unifiedSubNamespace, string $fullyQualifiedUnifiedClass): void
     {
         if (!$unifiedSubNamespace) {
             throw new \Exception(
                 'Could not extract unified sub namespace from string ' . $fullyQualifiedUnifiedClass,
-                static::ERROR_CODE_INVALID_UNIFIED_NAMESPACE
+                ErrorEnum::CODE_INVALID_UNIFIED_NAMESPACE->value
             );
         }
     }
 
-    /**
-     * Validate the layout of the edition class description as defined in the current UnifiedNameSpaceClassMap.php
-     * The this script has to be kept in sync with the layout of that file.
-     *
-     * @param array $editionClassDescription Holds the class name and metadata for a given edition class
-     *
-     * @throws \Exception
-     */
-    protected function validateEditionClassDescription(array $editionClassDescription)
+    protected function validateEditionClassDescription(array $editionClassDescription): void
     {
         $expectedKeys = ['isAbstract', 'isInterface', 'editionClassName', 'isDeprecated'];
         $message = 'Edition class description has a wrong layout. ' .
-                   'It must be an non empty array with the following keys ' . implode(',', $expectedKeys) . ' ';
-        $code = static::ERROR_CODE_INVALID_UNIFIED_NAMESPACE_CLASS_MAP_ENTRY;
+                   'It must be a non-empty array with the following keys ' . implode(',', $expectedKeys) . ' ';
 
-        if (empty($editionClassDescription) || !is_array($editionClassDescription)) {
-            throw new \Exception($message, $code);
+        if (!is_array($editionClassDescription) || empty($editionClassDescription)) {
+            throw new \Exception($message, ErrorEnum::CODE_INVALID_UNIFIED_NAMESPACE_CLASS_MAP->value);
         }
 
         $actualKeys = array_keys($editionClassDescription);
@@ -340,152 +229,85 @@ class Generator
         sort($actualKeys);
         if ($expectedKeys != $actualKeys) {
             $message .= ' Actual edition class description is ' . var_export($editionClassDescription, true);
-            throw new \Exception($message, $code);
+            throw new \Exception($message, ErrorEnum::CODE_INVALID_UNIFIED_NAMESPACE_CLASS_MAP->value);
         }
     }
 
-    /**
-     * Validate a given short class name of a class
-     *
-     * @param string $shortUnifiedClassName      Short name of the class
-     * @param string $fullyQualifiedUnifiedClass Full qualified name of class, where the short name should have been
-     *                                           extracted from
-     *
-     * @throws \Exception
-     */
-    protected function validateShortUnifiedClassName($shortUnifiedClassName, $fullyQualifiedUnifiedClass)
+    protected function validateShortUnifiedClassName(
+        string $shortUnifiedClassName,
+        string $fullyQualifiedUnifiedClass
+    ): void
     {
         if (!$shortUnifiedClassName) {
             throw new \Exception(
-                'Could not extract short unified class name from string ' . $fullyQualifiedUnifiedClass,
-                static::ERROR_CODE_INVALID_UNIFIED_CLASS_NAME
+                'Could not extract short unified a class name from string ' . $fullyQualifiedUnifiedClass,
+                ErrorEnum::CODE_INVALID_UNIFIED_CLASS_NAME->value
             );
         }
     }
 
-    /**
-     * Validate a given shop edition
-     *
-     * @param string $shopEdition Shop edition to validate
-     */
-    protected function validateShopEdition($shopEdition)
+    protected function validateShopEdition(string $shopEdition): void
     {
-        $expectedShopEditions = [static::COMMUNITY_EDITION, static::PROFESSIONAL_EDITION, static::ENTERPRISE_EDITION];
+        $expectedShopEditions = [$this->communityEdition, $this->professionalEdition, $this->enterpriseEdition];
         if (!in_array($this->shopEdition, $expectedShopEditions)) {
             throw new \InvalidArgumentException(
                 'Parameter $shopEdition has an unexpected value: "' . $shopEdition . '". ' .
                 'Expected values are: "' . implode(',', $expectedShopEditions) . '". ',
-                static::ERROR_CODE_INVALID_SHOP_EDITION
+                ErrorEnum::CODE_INVALID_SHOP_EDITION->value
             );
         }
     }
 
-    /**
-     * Validate the array which holds all existing sub-namespaces
-     *
-     * @param array $unifiedNamespaceArray Holds all existing sub namespaces
-     *
-     * @throws \Exception
-     */
-    protected function validateUnifiedNamespaceArray($unifiedNamespaceArray)
+    protected function validateUnifiedNamespaceArray(array $unifiedNamespaceArray): void
     {
         if (empty($unifiedNamespaceArray)) {
             throw new \Exception(
                 'No unified namespace found',
-                static::ERROR_CODE_NO_UNIFIED_NAMESPACE_FOUND
+                ErrorEnum::CODE_NO_UNIFIED_NAMESPACE_FOUND->value
             );
         }
     }
 
-    /**
-     * Validate the permission on the output directory
-     *
-     * @throws \Exception
-     */
-    protected function validateOutputDirectoryPermissions()
+    protected function validateOutputDirectoryPermissions(): void
     {
         if (!is_dir($this->outputDirectory)) {
-            throw new \OxidEsales\UnifiedNameSpaceGenerator\Exceptions\OutputDirectoryValidationException(
-                'The directory "' . $this->outputDirectory . '" where the class files have to be written to' .
-                ' does not exist. ' .
-                'Please create the directory "' . $this->outputDirectory . '" with write permissions for the user "' . get_current_user() . '" ' .
-                'and run this script again',
-                static::ERROR_CODE_DIRECTORY_CREATION_ERROR
+            throw new OutputDirectoryValidationException(
+                sprintf(
+                    'The directory "%s" where the class files have to be written to does not exist. Please ' .
+                    'create the directory "%s" with write permissions for the user "%s" and run this script again',
+                    $this->outputDirectory,
+                    $this->outputDirectory,
+                    get_current_user()
+                ),
+                ErrorEnum::CODE_DIRECTORY_CREATION_ERROR->value
             );
         } elseif (!is_writable($this->outputDirectory)) {
-            throw new \OxidEsales\UnifiedNameSpaceGenerator\Exceptions\OutputDirectoryValidationException(
-                'The directory "' . realpath($this->outputDirectory) . '" where the class files have to be written to' .
-                ' is not writable for user "' . get_current_user() . '". ' .
-                'Please fix the permissions on this directory ' .
-                'and run this script again',
-                static::ERROR_CODE_DIRECTORY_CREATION_ERROR
+            throw new OutputDirectoryValidationException(
+                sprintf(
+                    'The directory "%s" where the class files have to be written to is not writable for user ' .
+                    '"%s". Please fix the permissions on this directory and run this script again',
+                    realpath($this->outputDirectory),
+                    get_current_user()
+                ),
+                ErrorEnum::CODE_DIRECTORY_CREATION_ERROR->value
             );
         }
     }
 
-    /**
-     * Create the subdirectory, where the files of a given namespace will be written to and return is path
-     *
-     * @param string $unifiedSubNamespace A given unified sub-namespace
-     *
-     * @return string
-     *
-     * @throws \Symfony\Component\Filesystem\Exception\IOException
-     */
-    protected function createUnifiedNamespaceSubDirectory($unifiedSubNamespace)
+    protected function createUnifiedNamespaceSubDirectory(string $unifiedSubNamespace): string
     {
         $this->validateOutputDirectoryPermissions();
 
-        $unifiedSubNamespacePath = $this->outputDirectory . str_replace('\\', DIRECTORY_SEPARATOR, $unifiedSubNamespace);
+        $unifiedSubNamespacePath = Path::join($this->outputDirectory,$unifiedSubNamespace);
         $this->fileSystem->mkdir($unifiedSubNamespacePath, 0755);
 
         return $unifiedSubNamespacePath;
     }
 
-    /**
-     * Return a configured instance of smarty
-     *
-     * @return \Smarty
-     *
-     * @throws \Exception
-     */
-    protected function getSmarty()
+    protected function getTemplatingEngine(): PhpEngine
     {
-        $smarty = new \Smarty();
+        $filesystemLoader = new FilesystemLoader($this->templateDir . '%name%');
 
-        $smarty->template_dir = realpath(
-            __DIR__ . DIRECTORY_SEPARATOR .
-            'smarty' . DIRECTORY_SEPARATOR .
-            'templates' . DIRECTORY_SEPARATOR
-        );
-
-        $smarty->compile_dir = realpath(static::SMARTY_COMPILE_DIR);
-        if (!is_dir($smarty->compile_dir) || !is_writable($smarty->compile_dir)) {
-            throw new \Exception(
-                'Smarty compile directory ' . static::SMARTY_COMPILE_DIR .
-                ' is not writable for user "' . get_current_user() . '". ' .
-                'Please fix the permissions on this directory',
-                static::ERROR_CODE_SMARTY_COMPILE_DIR_PERMISSIONS
-            );
-        }
-
-        $smarty->left_delimiter = '{{';
-        $smarty->right_delimiter = '}}';
-
-        return $smarty;
-    }
-
-    /**
-     * Return true, if a given directory is empty. else return false.
-     *
-     * @param string $directory Real path to directory
-     *
-     * @return bool
-     */
-    protected function isDirectoryEmpty($directory)
-    {
-        $isEmpty = !(new \FilesystemIterator($directory))->valid();
-
-        return $isEmpty;
+        return new PhpEngine(new TemplateNameParser(), $filesystemLoader);
     }
 }
