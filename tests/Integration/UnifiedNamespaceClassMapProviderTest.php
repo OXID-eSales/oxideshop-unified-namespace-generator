@@ -21,29 +21,27 @@
 
 namespace OxidEsales\UnifiedNameSpaceGenerator\tests\Integration;
 
+use OxidEsales\Facts\Facts;
 use \OxidEsales\UnifiedNameSpaceGenerator\UnifiedNamespaceClassMapProvider;
 use OxidEsales\UnifiedNameSpaceGenerator\Exceptions\InvalidUnifiedNamespaceClassMapException;
 use org\bovigo\vfs\vfsStream;
 use org\bovigo\vfs\vfsStreamDirectory;
+use PHPUnit\Framework\MockObject\MockObject as MockObjectAlias;
+use PHPUnit\Framework\TestCase;
+use Symfony\Component\Filesystem\Path as PathAlias;
 
 /**
  * Class UnifiedNamespaceClasSMapProviderTest
  *
  * @package OxidEsales\UnifiedNameSpaceGenerator\tests
  */
-class UnifiedNamespaceClassMapProviderTest extends \PHPUnit\Framework\TestCase
+class UnifiedNamespaceClassMapProviderTest extends TestCase
 {
 
-    const ROOT_DIRECTORY = 'root';
+    private static string $rootDir = 'root';
 
-    /**
-     * @var vfsStreamDirectory
-     */
-    private $vfsStreamDirectory = null;
+    private null|vfsStreamDirectory $vfsStreamDirectory = null;
 
-    /**
-     * Test case that the BC map is missing
-     */
     public function testGetClassMapMapNotAvailable()
     {
         $this->expectException(InvalidUnifiedNamespaceClassMapException::class);
@@ -54,9 +52,6 @@ class UnifiedNamespaceClassMapProviderTest extends \PHPUnit\Framework\TestCase
         $unifiedNameSpaceClassMapProvider->getClassMap();
     }
 
-    /**
-     * Test case that the BC map is no array.
-     */
     public function testGetClassMapBCMapNotAnArray()
     {
         $this->expectException(InvalidUnifiedNamespaceClassMapException::class);
@@ -67,10 +62,7 @@ class UnifiedNamespaceClassMapProviderTest extends \PHPUnit\Framework\TestCase
         $unifiedNameSpaceClassMapProvider->getClassMap();
     }
 
-    /**
-     * @return array
-     */
-    public function providerClassMapsAndEditions()
+    public static function providerClassMapsAndEditions(): array
     {
         return [
             'ce_edition' => [
@@ -165,11 +157,8 @@ class UnifiedNamespaceClassMapProviderTest extends \PHPUnit\Framework\TestCase
 
     /**
      * @dataProvider providerClassMapsAndEditions
-     *
-     * @param string $edition
-     * @param array  $expectedClassMap
      */
-    public function testGetClassMapValid($edition, $expectedClassMap)
+    public function testGetClassMapValid(string $edition, array $expectedClassMap)
     {
         $this->copyTestDataIntoVirtualFileSystem('case_valid');
         $factsMock = $this->getFactsMock($edition);
@@ -182,19 +171,11 @@ class UnifiedNamespaceClassMapProviderTest extends \PHPUnit\Framework\TestCase
         );
     }
 
-    /**
-     * @todo Code is duplicated in other test classes. Either move to separate class or use testing library
-     *
-     * @param string $edition The OXID eShop Edition, which the facts should give back.
-     *
-     * @return \OxidEsales\Facts\Facts
-     */
-    private function getFactsMock($edition = 'CE')
+    private function getFactsMock(string $edition): MockObjectAlias|Facts
     {
-        /** @var \PHPUnit_Framework_MockObject_MockObject|\OxidEsales\Facts\Facts $mock */
-        $mock = $this->getMockBuilder(\OxidEsales\Facts\Facts::class)
+        $mock = $this->getMockBuilder(Facts::class)
             ->disableOriginalConstructor()
-            ->setMethods(
+            ->onlyMethods(
                 [
                     'getEdition',
                     'getShopRootPath'
@@ -207,30 +188,19 @@ class UnifiedNamespaceClassMapProviderTest extends \PHPUnit\Framework\TestCase
         return $mock;
     }
 
-    /**
-     * @todo Code is duplicated in other test classes. Either move to separate class or use testing library
-     *
-     * @return vfsStreamDirectory
-     */
-    private function getVirtualFileSystem()
+    private function getVirtualFileSystem(): ?vfsStreamDirectory
     {
         if (is_null($this->vfsStreamDirectory)) {
-            $this->vfsStreamDirectory = vfsStream::setup(self::ROOT_DIRECTORY);
+            $this->vfsStreamDirectory = vfsStream::setup(self::$rootDir);
         }
 
         return $this->vfsStreamDirectory;
     }
 
-    /**
-     * @todo Code is duplicated in other test classes. Either move to separate class or use testing library
-     *
-     * @param string $testCaseDirectory The directory within the pysical directory testData you want to
-     *                                  load into the file system
-     */
-    private function copyTestDataIntoVirtualFileSystem($testCaseDirectory)
+    private function copyTestDataIntoVirtualFileSystem($testCaseDirectory): void
     {
         try {
-            $pathToTestData = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'testData' . DIRECTORY_SEPARATOR . $testCaseDirectory;
+            $pathToTestData = PathAlias::join(dirname(__FILE__), 'testData', $testCaseDirectory);
             $virtualFileSystem = $this->getVirtualFileSystem();
 
             vfsStream::copyFromFileSystem(
@@ -242,15 +212,8 @@ class UnifiedNamespaceClassMapProviderTest extends \PHPUnit\Framework\TestCase
         }
     }
 
-    /**
-     * Returns the root url. It should be treated as usual file path.
-     *
-     * @todo Code is duplicated in other test classes. Either move to separate class or use testing library
-     *
-     * @return string
-     */
-    private function getVirtualFilesystemRootPath()
+    private function getVirtualFilesystemRootPath(): string
     {
-        return vfsStream::url(self::ROOT_DIRECTORY) . DIRECTORY_SEPARATOR;
+        return vfsStream::url(self::$rootDir) . DIRECTORY_SEPARATOR;
     }
 }

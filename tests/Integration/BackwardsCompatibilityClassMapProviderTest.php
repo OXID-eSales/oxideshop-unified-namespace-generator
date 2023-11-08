@@ -130,7 +130,7 @@ class BackwardsCompatibilityClassMapProviderTest extends \PHPUnit\Framework\Test
         /** @var \PHPUnit_Framework_MockObject_MockObject|\OxidEsales\Facts\Facts $mock */
         $mock = $this->getMockBuilder(\OxidEsales\Facts\Facts::class)
             ->disableOriginalConstructor()
-            ->setMethods(
+            ->onlyMethods(
                 [
                     'getEdition',
                     'getShopRootPath'

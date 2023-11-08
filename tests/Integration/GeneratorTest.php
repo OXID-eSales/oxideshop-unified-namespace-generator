@@ -23,6 +23,13 @@ namespace OxidEsales\UnifiedNameSpaceGenerator\tests\Integration;
 
 use org\bovigo\vfs\vfsStream;
 use org\bovigo\vfs\vfsStreamDirectory;
+use OxidEsales\Facts\Facts;
+use OxidEsales\UnifiedNameSpaceGenerator\Exceptions\OutputDirectoryValidationException;
+use OxidEsales\UnifiedNameSpaceGenerator\Generator;
+use OxidEsales\UnifiedNameSpaceGenerator\tests\Integration\TestGenerator as IntegrationTestGenerator;
+use OxidEsales\UnifiedNameSpaceGenerator\UnifiedNameSpaceClassMapProvider;
+use PHPUnit\Framework\MockObject\MockObject;
+use Symfony\Component\Filesystem\Path;
 
 /**
  * Class TestGenerator
@@ -37,27 +44,19 @@ class TestGenerator extends \OxidEsales\UnifiedNameSpaceGenerator\Generator
 }
 
 /**
- * Class GeneratorIntegrationTest
- *
  * @package OxidEsales\UnifiedNameSpaceGenerator\tests
  */
 class GeneratorTest extends \PHPUnit\Framework\TestCase
 {
+    private static string $testOutputDir;
 
-    const TEST_OUTPUT_DIR = __DIR__ . DIRECTORY_SEPARATOR . 'test_generated' . DIRECTORY_SEPARATOR;
-    const ROOT_DIRECTORY = 'root';
+    private static string $rootDir = 'root';
 
-    private $validBasePath = __DIR__ . DIRECTORY_SEPARATOR . 'testData' . DIRECTORY_SEPARATOR . 'case_valid';
+    private string $validBasePath = __DIR__ . DIRECTORY_SEPARATOR . 'testData' . DIRECTORY_SEPARATOR . 'case_valid';
 
-    /**
-     * @var vfsStreamDirectory
-     */
-    private $vfsStreamDirectory = null;
+    private ?vfsStreamDirectory $vfsStreamDirectory = null;
 
-    /**
-     * @var array Example class map for testing.
-     */
-    private $classMapExample = [
+    private array $classMapExample = [
         'OxidEsales\Eshop\Core\Contract\AbstractUpdatableFields'    => [
             'editionClassName' => \OxidEsales\EshopCommunity\Core\Contract\AbstractUpdatableFields::class,
             'isAbstract'       => true,
@@ -90,10 +89,7 @@ class GeneratorTest extends \PHPUnit\Framework\TestCase
         ],
     ];
 
-    /**
-     * @var array Expected files.
-     */
-    private $checkForFiles = [
+    private array $checkForFiles = [
         'AbstractUpdatableFields.php'    => 'OxidEsales' . DIRECTORY_SEPARATOR . 'Eshop' . DIRECTORY_SEPARATOR .
                                             'Core' . DIRECTORY_SEPARATOR . 'Contract' . DIRECTORY_SEPARATOR .
                                             'AbstractUpdatableFields.php',
@@ -111,37 +107,30 @@ class GeneratorTest extends \PHPUnit\Framework\TestCase
                                             'IConfigurable.php',
     ];
 
-    /**
-     * Fixture set up.
-     */
     protected function setUp(): void
     {
         parent::setUp();
+        self::$testOutputDir = Path::join(__DIR__ , 'test_generated') .  DIRECTORY_SEPARATOR;
 
-        if (!is_dir(self::TEST_OUTPUT_DIR)) {
-            mkdir(self::TEST_OUTPUT_DIR);
+        if (!is_dir(self::$testOutputDir)) {
+            mkdir(self::$testOutputDir);
         }
+
 
         $this->removeTestResults();
     }
 
-    /**
-     * Fixture tear down
-     */
     protected function tearDown(): void
     {
         $this->removeTestResults();
 
-        if (is_dir(self::TEST_OUTPUT_DIR)) {
-            rmdir(self::TEST_OUTPUT_DIR);
+        if (is_dir(self::$testOutputDir)) {
+            rmdir(self::$testOutputDir);
         }
 
         parent::tearDown();
     }
 
-    /**
-     * Test case that the main target directory does not exist
-     */
     public function testGeneratorConstructorTargetDirectoryNotExisting()
     {
         $notExistingDirectory = $this->getOutputDirectory() . DIRECTORY_SEPARATOR . 'not_existing';
@@ -150,17 +139,12 @@ class GeneratorTest extends \PHPUnit\Framework\TestCase
         $this->setExpectedExceptionOutputDirectoryValidationException();
 
         $factsMock = $this->getFactsMock();
-        $providerMock = $this->getUnifiedNameSpaceProviderMock($factsMock);
+        $providerMock = $this->getUnifiedNameSpaceProviderMock();
 
         $this->createGenerator($factsMock, $providerMock, $notExistingDirectory);
     }
 
-    /**
-     * Data provider.
-     *
-     * @return array
-     */
-    public function providerCleanupOutputDirectoryPermissions()
+    public static function providerCleanupOutputDirectoryPermissions(): array
     {
         $data = [];
 
@@ -190,8 +174,6 @@ class GeneratorTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * Test cases that output directory cannot be cleaned due to permission issues.
-     *
      * @dataProvider providerCleanupOutputDirectoryPermissions
      *
      * @param array  $structure
@@ -200,7 +182,7 @@ class GeneratorTest extends \PHPUnit\Framework\TestCase
      */
     public function testCleanupOutputDirectoryPermissions($structure, $permissions, $relativePath)
     {
-        $outputDirectory = $this->getVirtualOutputDirectory(0777, $structure);
+        $outputDirectory = $this->getVirtualOutputDirectory($structure);
         /**
          * File and directory deletions are operation on the directory. So the right permission on the directory,
          * not the file have to be set
@@ -210,18 +192,13 @@ class GeneratorTest extends \PHPUnit\Framework\TestCase
         $this->expectException(\Symfony\Component\Filesystem\Exception\IOException::class);
 
         $factsMock = $this->getFactsMock();
-        $providerMock = $this->getUnifiedNameSpaceProviderMock($factsMock);
+        $providerMock = $this->getUnifiedNameSpaceProviderMock();
 
         $generator = $this->createGenerator($factsMock, $providerMock, $outputDirectory);
         $generator->cleanupOutputDirectory();
     }
 
-    /**
-     * Data provider.
-     *
-     * @return array
-     */
-    public function providerTestMapValidationErrors()
+    public static function providerTestMapValidationErrors(): array
     {
         $data = [];
 
@@ -263,49 +240,36 @@ class GeneratorTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * Test class map validation errors.
-     *
      * @dataProvider providerTestMapValidationErrors
-     *
-     * @param array  $classMap
-     * @param string $exceptionClass
-     * @param string $exceptionMessage
      */
-    public function testGenerateValidationErrors($classMap, $exceptionMessage)
+    public function testGenerateValidationErrors(array $classMap, string $exceptionMessage): void
     {
-        $this->expectException(\Exception::class, $exceptionMessage);
+        $this->expectException(\Exception::class);
 
-        $this->copyTestDataIntoVirtualFileSystem('case_valid');
+        $this->copyTestDataIntoVirtualFileSystem();
         $factsMock = $this->getFactsMock();
-        $providerMock = $this->getUnifiedNameSpaceProviderMock($factsMock, $classMap);
+        $providerMock = $this->getUnifiedNameSpaceProviderMock($classMap);
 
         $generator = $this->createGenerator($factsMock, $providerMock, $this->getVirtualOutputDirectory());
         $generator->generate();
     }
 
-    /**
-     * Test invalid shop edition.
-     */
-    public function testGenerateInvalidShopEdition()
+    public function testGenerateInvalidShopEdition(): void
     {
         $this->expectException(\Exception::class, 'Parameter $shopEdition has an unexpected value: "XX"');
 
         $factsMock = $this->getFactsMock('XX');
-        $providerMock = $this->getUnifiedNameSpaceProviderMock($factsMock);
+        $providerMock = $this->getUnifiedNameSpaceProviderMock();
 
         $this->createGenerator($factsMock, $providerMock, $this->getVirtualOutputDirectory());
     }
 
-    /**
-     * All is well case testing the full integration.
-     * Writes files to actual filesystem.
-     */
-    public function testGenerateGeneratedClassesOk()
+    public function testGenerateGeneratedClassesOk(): void
     {
-        $this->copyTestDataIntoVirtualFileSystem('case_valid');
+        $this->copyTestDataIntoVirtualFileSystem();
         $outputDirectory = $this->getOutputDirectory();
         $factsMock = $this->getFactsMock();
-        $providerMock = $this->getUnifiedNameSpaceProviderMock($factsMock);
+        $providerMock = $this->getUnifiedNameSpaceProviderMock();
 
         $generator = $this->createGenerator($factsMock, $providerMock, $outputDirectory);
         $generator->generate();
@@ -321,17 +285,12 @@ class GeneratorTest extends \PHPUnit\Framework\TestCase
         }
     }
 
-    /**
-     * All is well case testing the full integration.
-     * Running twice, verify shop edition switch does work.
-     * Writes files to actual filesystem.
-     */
-    public function testGenerateGeneratedClassesOkMultipleRuns()
+    public function testGenerateGeneratedClassesOkMultipleRuns(): void
     {
-        $this->copyTestDataIntoVirtualFileSystem('case_valid');
+        $this->copyTestDataIntoVirtualFileSystem();
         $outputDirectory = $this->getOutputDirectory();
         $factsMock = $this->getFactsMock('EE');
-        $providerMock = $this->getUnifiedNameSpaceProviderMock($factsMock);
+        $providerMock = $this->getUnifiedNameSpaceProviderMock();
 
         $generator = $this->createGenerator($factsMock, $providerMock, $this->getOutputDirectory());
         $generator->generate();
@@ -340,10 +299,16 @@ class GeneratorTest extends \PHPUnit\Framework\TestCase
         foreach ($this->checkForFiles as $name => $path) {
             $resultFile = $this->assertFileExistsAfterGeneration($outputDirectory, $path);
 
-            $expectedFileContent = file_get_contents($this->validBasePath . DIRECTORY_SEPARATOR . 'ExpectedClasses' . DIRECTORY_SEPARATOR . $name);
+            $expectedFileContent = file_get_contents(
+                $this->validBasePath . DIRECTORY_SEPARATOR . 'ExpectedClasses' . DIRECTORY_SEPARATOR . $name
+            );
             $actualFileContent = trim(file_get_contents($resultFile));
 
-            $this->assertNotSame($expectedFileContent, $actualFileContent, "Expected and actual content of file '$name' are unexpectedly the same!");
+            $this->assertNotSame(
+                $expectedFileContent,
+                $actualFileContent,
+                "Expected and actual content of file '$name' are unexpectedly the same!"
+            );
             $this->assertStringContainsString('OXID eShop EE', file_get_contents($resultFile));
         }
 
@@ -351,29 +316,21 @@ class GeneratorTest extends \PHPUnit\Framework\TestCase
         $this->testGenerateGeneratedClassesOk();
     }
 
-    /**
-     * Test case that the target directory can not be created during file generation.
-     * NOTE: We first create the generator object with a writable directory and then change permissions before
-     *       calling Generator::generate().
-     */
-    public function testGenerateCannotCreateTargetDirectory()
+    public function testGenerateCannotCreateTargetDirectory(): void
     {
-        $outputDirectory = $this->getVirtualOutputDirectory(0777);
+        $outputDirectory = $this->getVirtualOutputDirectory();
         chmod($outputDirectory, 0000);
 
         $this->setExpectedExceptionOutputDirectoryValidationException();
 
         $factsMock = $this->getFactsMock();
-        $providerMock = $this->getUnifiedNameSpaceProviderMock($factsMock);
+        $providerMock = $this->getUnifiedNameSpaceProviderMock();
 
         $generator = $this->createGenerator($factsMock, $providerMock, $outputDirectory);
         $generator->generate();
     }
 
-    /**
-     * Test case that the output file cannot be written because a not overridable one happens to be present.
-     */
-    public function testGenerateCannotWriteFile()
+    public function testGenerateCannotWriteFile(): void
     {
         /** In this case a directory named 'Article.php' is present, so the file 'Article.php' cannot be created */
         $structure = [
@@ -382,8 +339,8 @@ class GeneratorTest extends \PHPUnit\Framework\TestCase
             ]
         ];
 
-        $this->copyTestDataIntoVirtualFileSystem('case_valid');
-        $outputDirectory = $this->getVirtualOutputDirectory(0777, $structure);
+        $this->copyTestDataIntoVirtualFileSystem();
+        $outputDirectory = $this->getVirtualOutputDirectory($structure);
 
         $file = $outputDirectory . 'OxidEsales' . DIRECTORY_SEPARATOR . 'Eshop' . DIRECTORY_SEPARATOR . 'Application' .
                 DIRECTORY_SEPARATOR . 'Model' . DIRECTORY_SEPARATOR . 'Article.php';
@@ -392,7 +349,7 @@ class GeneratorTest extends \PHPUnit\Framework\TestCase
         $this->expectException(\OxidEsales\UnifiedNameSpaceGenerator\Exceptions\FileSystemCompatibilityException::class);
 
         $factsMock = $this->getFactsMock();
-        $providerMock = $this->getUnifiedNameSpaceProviderMock($factsMock);
+        $providerMock = $this->getUnifiedNameSpaceProviderMock();
 
         $generator = $this->createGenerator($factsMock, $providerMock, $outputDirectory);
         /**
@@ -402,29 +359,23 @@ class GeneratorTest extends \PHPUnit\Framework\TestCase
         @$generator->generate();
     }
 
-    /**
-     * Test the case that the smarty compile directory is not accessible.
-     */
-    public function testSmartyCompileDirectoryNotAccessible()
+    public function testSmartyCompileDirectoryNotAccessible(): void
     {
-        $this->copyTestDataIntoVirtualFileSystem('case_valid');
+        $this->copyTestDataIntoVirtualFileSystem();
         $outputDirectory = $this->getOutputDirectory();
 
-        $message = 'Smarty compile directory ' . \OxidEsales\UnifiedNameSpaceGenerator\tests\Integration\TestGenerator::SMARTY_COMPILE_DIR .
+        $message = 'Smarty compile directory ' . IntegrationTestGenerator::SMARTY_COMPILE_DIR .
                    ' is not writable for user';
         $this->expectException(\Exception::class, $message);
 
         $factsMock = $this->getFactsMock();
-        $providerMock = $this->getUnifiedNameSpaceProviderMock($factsMock);
+        $providerMock = $this->getUnifiedNameSpaceProviderMock();
 
-        $generator = new \OxidEsales\UnifiedNameSpaceGenerator\tests\Integration\TestGenerator($factsMock, $providerMock, $outputDirectory);
+        $generator = new IntegrationTestGenerator($factsMock, $providerMock, $outputDirectory);
         $generator->generate();
     }
 
-    /**
-     * Test helper for cleaning up.
-     */
-    private function removeTestResults()
+    private function removeTestResults(): void
     {
         $testDir = $this->getOutputDirectory();
         $directoryIterator = new \RecursiveDirectoryIterator($testDir, \RecursiveDirectoryIterator::SKIP_DOTS);
@@ -439,67 +390,41 @@ class GeneratorTest extends \PHPUnit\Framework\TestCase
         }
     }
 
-    /**
-     * Get path to output directory.
-     *
-     * @return string
-     */
-    private function getOutputDirectory()
+    private function getOutputDirectory(): string
     {
-        return __DIR__ . DIRECTORY_SEPARATOR . 'test_generated' . DIRECTORY_SEPARATOR;
+        return Path::join(__DIR__, 'test_generated') . DIRECTORY_SEPARATOR;
     }
 
-    /**
-     * @param \OxidEsales\Facts\Facts $facts
-     *
-     * @return \OxidEsales\UnifiedNameSpaceGenerator\UnifiedNameSpaceClassMapProvider
-     */
-    protected function getUnifiedNameSpaceProviderMock(\OxidEsales\Facts\Facts $facts, $classMap = null)
+    protected function getUnifiedNameSpaceProviderMock($classMap = null): UnifiedNameSpaceClassMapProvider
     {
         if (empty($classMap) && [] !== $classMap) {
             $classMap = $this->classMapExample;
         }
 
-        $mock = $this->getMockBuilder(\OxidEsales\UnifiedNameSpaceGenerator\UnifiedNameSpaceClassMapProvider::class)
+        $mock = $this->getMockBuilder(UnifiedNameSpaceClassMapProvider::class)
             ->disableOriginalConstructor()
-            ->setMethods(['getClassMap'])
+            ->onlyMethods(['getClassMap'])
             ->getMock();
         $mock->expects($this->any())->method('getClassMap')->willReturn($classMap);
 
         return $mock;
     }
 
-    /**
-     * Create the Unified Namespace Generator.
-     *
-     * @param \OxidEsales\Facts\Facts                                                $facts           The Facts object.
-     * @param \OxidEsales\UnifiedNameSpaceGenerator\UnifiedNameSpaceClassMapProvider $provider        The Unified Namespace class map provider.
-     * @param string                                                                 $outputDirectory The directory in which the generator writes.
-     *
-     * @return \OxidEsales\UnifiedNameSpaceGenerator\Generator
-     */
-    private function createGenerator($facts, $provider, $outputDirectory)
+    private function createGenerator(
+        Facts $facts,
+        UnifiedNameSpaceClassMapProvider $provider,
+        string $outputDirectory
+    ): Generator
     {
-        return new \OxidEsales\UnifiedNameSpaceGenerator\Generator($facts, $provider, $outputDirectory);
+        return new Generator($facts, $provider, $outputDirectory);
     }
 
-    /**
-     * Set the expected exception, that the output directory is not writable.
-     */
-    private function setExpectedExceptionOutputDirectoryValidationException()
+    private function setExpectedExceptionOutputDirectoryValidationException(): void
     {
-        $this->expectException(\OxidEsales\UnifiedNameSpaceGenerator\Exceptions\OutputDirectoryValidationException::class);
+        $this->expectException(OutputDirectoryValidationException::class);
     }
 
-    /**
-     * Assert, that a wished file exists after the generation.
-     *
-     * @param string $outputDirectory  The generator output directory.
-     * @param string $relativeFilePath The relative path of the file.
-     *get
-     * @return string The complete path of the file.
-     */
-    private function assertFileExistsAfterGeneration($outputDirectory, $relativeFilePath)
+    private function assertFileExistsAfterGeneration(string $outputDirectory, string $relativeFilePath): string
     {
         $resultFile = $outputDirectory . DIRECTORY_SEPARATOR . $relativeFilePath;
         $this->assertTrue(file_exists($resultFile), "File '$resultFile' does not exists after file generation!");
@@ -507,17 +432,7 @@ class GeneratorTest extends \PHPUnit\Framework\TestCase
         return $resultFile;
     }
 
-    /**
-     * Get path to virtual output directory and copy the give structure $structure inside
-     *
-     * @todo Code is duplicated in other test classes. Either move to separate class or use testing library
-     *
-     * @param int   $permissions Directory permissions
-     * @param array $structure   Optional directory structure to create inside output folder
-     *
-     * @return string
-     */
-    private function getVirtualOutputDirectory($permissions = 0777, $structure = null)
+    private function getVirtualOutputDirectory(array $structure = null): string
     {
         if (!is_array($structure)) {
             $structure = ['generated' => []];
@@ -525,24 +440,16 @@ class GeneratorTest extends \PHPUnit\Framework\TestCase
 
         vfsStream::create($structure, $this->getVirtualFileSystem());
         $directory = $this->getVirtualFilesystemRootPath() . 'generated';
-        chmod($directory, $permissions);
+        chmod($directory, 0777);
 
         return $directory . DIRECTORY_SEPARATOR;
     }
 
-    /**
-     * @todo Code is duplicated in other test classes. Either move to separate class or use testing library
-     *
-     * @param string $edition The OXID eShop Edition, which the facts should give back.
-     *
-     * @return \OxidEsales\Facts\Facts
-     */
-    private function getFactsMock($edition = 'CE')
+    private function getFactsMock(string $edition = 'CE'): Facts|MockObject
     {
-        /** @var \PHPUnit_Framework_MockObject_MockObject|\OxidEsales\Facts\Facts $mock */
         $mock = $this->getMockBuilder(\OxidEsales\Facts\Facts::class)
             ->disableOriginalConstructor()
-            ->setMethods(
+            ->onlyMethods(
                 [
                     'getEdition',
                     'getShopRootPath'
@@ -555,30 +462,19 @@ class GeneratorTest extends \PHPUnit\Framework\TestCase
         return $mock;
     }
 
-    /**
-     * @todo Code is duplicated in other test classes. Either move to separate class or use testing library
-     *
-     * @return vfsStreamDirectory
-     */
-    private function getVirtualFileSystem()
+    private function getVirtualFileSystem(): vfsStreamDirectory
     {
         if (is_null($this->vfsStreamDirectory)) {
-            $this->vfsStreamDirectory = vfsStream::setup(self::ROOT_DIRECTORY);
+            $this->vfsStreamDirectory = vfsStream::setup(self::$rootDir);
         }
 
         return $this->vfsStreamDirectory;
     }
 
-    /**
-     * @todo Code is duplicated in other test classes. Either move to separate class or use testing library
-     *
-     * @param string $testCaseDirectory The directory within the pysical directory testData you want to
-     *                                  load into the file system
-     */
-    private function copyTestDataIntoVirtualFileSystem($testCaseDirectory)
+    private function copyTestDataIntoVirtualFileSystem(): void
     {
         try {
-            $pathToTestData = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'testData' . DIRECTORY_SEPARATOR . $testCaseDirectory;
+            $pathToTestData = Path::join(dirname(__FILE__), 'testData', 'case_valid');
             $virtualFileSystem = $this->getVirtualFileSystem();
 
             vfsStream::copyFromFileSystem(
@@ -590,15 +486,8 @@ class GeneratorTest extends \PHPUnit\Framework\TestCase
         }
     }
 
-    /**
-     * Returns the root url. It should be treated as usual file path.
-     *
-     * @todo Code is duplicated in other test classes. Either move to separate class or use testing library
-     *
-     * @return string
-     */
-    private function getVirtualFilesystemRootPath()
+    private function getVirtualFilesystemRootPath(): string
     {
-        return vfsStream::url(self::ROOT_DIRECTORY) . DIRECTORY_SEPARATOR;
+        return vfsStream::url(self::$rootDir) . DIRECTORY_SEPARATOR;
     }
 }
