@@ -1,0 +1,12 @@
+install_module:
+  matrix_testplan: '["-"]'
+  cache:
+    prefix: &install_module_prefix 'moduleInstallation-ce-{{ .Github.SHA }}-{{ .Github.RunNumber }}-{{ .Github.RunAttempt }}'
+  ids: &ids 'oe_moduletemplate'
+  activate: *ids
+  git:
+    module:
+      url: &git_module_url '{{ .Github.Repository }}'
+      ref: '{{ .Github.Ref }}'
+  package_name: &package_name 'oxid-esales/module-template'
+  path: *ids
