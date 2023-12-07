@@ -3,7 +3,7 @@ prepare_shop:
     require:
       install: 'oxideshop-unified-namespace-generator:dev-{{ .Github.RefName }} phpunit/phpunit:^10'
   git: &git
-    shop_ref: 'dev-b-7.1.x-MWF-TEST-phpunit10-OXDEV-7513'
+    shop_ref: 'b-7.1.x-MWF-TEST-phpunit10-OXDEV-7513'
 
 install_shop:
   git: *git
