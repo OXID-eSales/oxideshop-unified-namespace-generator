@@ -1,7 +1,7 @@
 prepare_shop:
   composer:
     require:
-      install: 'oxideshop-unified-namespace-generator:dev-{{ .Github.RefName }}'
+      install: 'oxideshop-unified-namespace-generator:dev-{{ .Github.RefName }} phpunit/phpunit:^10'
 
 phpunit:
   matrix:
@@ -10,7 +10,7 @@ phpunit:
   container:
     options: '-e XDEBUG_MODE=coverage'
   test: '/var/www/vendor/oxid-esales/oxideshop-unified-namespace-generator/tests/Integration'
-  additional_options: '--bootstrap /var/www/source/tests/bootstrap.php --coverage-clover=/var/www/integration_coverage.xml'
+  additional_options: '--bootstrap /var/www/tests/bootstrap.php --coverage-clover=/var/www/integration_coverage.xml'
   logfile:
     prefix: 'phpunit_integration'
   output:
