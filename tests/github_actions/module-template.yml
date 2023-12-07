@@ -37,7 +37,7 @@ sonarcloud:
 
 phpcs_tests:
   # Check all files in the full check
-  diff_only: false
+  diff_only: true
   filter: '^\./vendor/oxid-esales/oxideshop-unified-namespace-generator/src/.*\.php$'
 
 finish:
