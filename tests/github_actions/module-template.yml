@@ -3,19 +3,19 @@ prepare_shop:
     require:
       install: 'oxideshop-unified-namespace-generator:dev-{{ .Github.RefName }} phpunit/phpunit:^10'
 
-install_module:
-  matrix:
-    testplan: '["-"]'
-  cache:
-    prefix: &install_module_prefix 'moduleInstallation-ce-{{ .Github.SHA }}-{{ .Github.RunNumber }}-{{ .Github.RunAttempt }}'
-  ids: &ids 'dummy'
-  activate: ''
-  git:
-    module:
-      url: &git_module_url '{{ .Github.Repository }}'
-      ref: '{{ .Github.RefName }}'
-  package_name: &package_name 'oxid-esales/dummy'
-  path: *ids
+#install_module:
+#  matrix:
+#    testplan: '["-"]'
+#  cache:
+#    prefix: &install_module_prefix 'moduleInstallation-ce-{{ .Github.SHA }}-{{ .Github.RunNumber }}-{{ .Github.RunAttempt }}'
+#  ids: &ids 'oxideshopunifiednamespacegenerator'
+#  activate: *ids
+#  git:
+#    module:
+#      url: &git_module_url '{{ .Github.Repository }}'
+#      ref: '{{ .Github.RefName }}'
+#  package_name: &package_name 'oxid-esales/oxideshop-unified-namespace-generator'
+#  path: *ids
 
 phpunit:
   matrix:
