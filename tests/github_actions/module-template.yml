@@ -1,12 +1,44 @@
-install_module:
-  matrix_testplan: '["-"]'
-  cache:
-    prefix: &install_module_prefix 'moduleInstallation-ce-{{ .Github.SHA }}-{{ .Github.RunNumber }}-{{ .Github.RunAttempt }}'
-  ids: &ids 'oe_moduletemplate'
-  activate: *ids
-  git:
-    module:
-      url: &git_module_url '{{ .Github.Repository }}'
-      ref: '{{ .Github.Ref }}'
-  package_name: &package_name 'oxid-esales/module-template'
-  path: *ids
+prepare_shop:
+  composer:
+    require:
+      install: 'oxideshop-unified-namespace-generator:{{ .Github.RefName }}'
+
+phpunit:
+  matrix:
+    testplan: '["-"]'
+  title: 'integration_tests'
+  container:
+    options: '-e XDEBUG_MODE=coverage'
+  test: '/var/www/vendor/oxideshop-unified-namespace-generator/tests/Integration'
+  additional_options: '--bootstrap /var/www/source/tests/bootstrap.php --coverage-clover=/var/www/integration_coverage.xml'
+  logfile:
+    prefix: 'phpunit_integration'
+  output:
+    prefix: 'integration_artifacts'
+    files: |
+      source/integration_coverage.xml
+      generated_testplan.yaml
+      source/source/log/oxideshop.log
+      data/php/logs/error_log.txt
+  coverage:
+    path: 'source/integration_coverage.xml'
+    
+codeception:
+  matrix:
+    testplan: &skip 'skip'
+
+runtest:
+  matrix:
+    testplan: *skip
+
+sonarcloud:
+  matrix:
+    testplan: *skip
+
+phpcs_tests:
+  # Check all files in the full check
+  diff_only: false
+  filter: '^\./vendor/oxideshop-unified-namespace-generator/src/.*\.php$'
+
+finish:
+  slack_title: 'Integration tests on oxideshop-unified-namespace-generator {{ .Github.RefName }} by {{ .Github.Actor }}'
