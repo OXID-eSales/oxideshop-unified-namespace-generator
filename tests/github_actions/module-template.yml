@@ -1,7 +1,7 @@
 prepare_shop:
   composer:
     require:
-      install: 'oxideshop-unified-namespace-generator:{{ .Github.RefName }}'
+      install: 'oxideshop-unified-namespace-generator:dev-{{ .Github.RefName }}'
 
 phpunit:
   matrix:
