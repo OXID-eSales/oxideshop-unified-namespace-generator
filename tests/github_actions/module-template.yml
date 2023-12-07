@@ -2,6 +2,11 @@ prepare_shop:
   composer:
     require:
       install: 'oxideshop-unified-namespace-generator:dev-{{ .Github.RefName }} phpunit/phpunit:^10'
+  git: &git
+    shop_ref: 'dev-b-7.1.x-phpunit10-OXDEV-7513'
+
+install_shop:
+  git: *git
 
 #install_module:
 #  matrix:
