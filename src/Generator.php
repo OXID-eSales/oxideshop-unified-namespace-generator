@@ -433,6 +433,8 @@ class Generator
      * @return \Smarty
      *
      * @throws \Exception
+     *
+     * @deprecated will be removed in v8.0.
      */
     protected function getSmarty()
     {
