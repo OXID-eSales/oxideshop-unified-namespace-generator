@@ -2,6 +2,9 @@
 
 ## v5.0.0 - Unreleased
 
+### Added
+- PHP version requirement to ^8.1.
+
 ### Removed
 - Smarty template engine support
 
