@@ -18,5 +18,4 @@ namespace OxidEsales\Eshop\Core\Contract;
  */
 abstract class AbstractUpdatableFields extends \OxidEsales\EshopCommunity\Core\Contract\AbstractUpdatableFields
 {
-
 }

@@ -1,5 +1,16 @@
 # Change Log for OXID eSales Unified Namespace Generator
 
+## v5.1.0 Unreleased
+
+### Added
+- PHPUnit v10 support
+
+### Changed
+- Class template engine switched from Symfony template engine to Twig
+
+### Removed
+- PHPUnit v9 support
+
 ## v5.0.0 - 2024-03-15
 
 ### Added

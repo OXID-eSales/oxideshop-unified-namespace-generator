@@ -9,6 +9,9 @@ declare(strict_types=1);
 
 namespace OxidEsales\UnifiedNameSpaceGenerator\Tests\Integration;
 
+use OxidEsales\EshopCommunity;
+use OxidEsales\EshopProfessional;
+use OxidEsales\EshopEnterprise;
 use OxidEsales\UnifiedNameSpaceGenerator\Exceptions\InvalidUnifiedNamespaceClassMapException;
 use OxidEsales\UnifiedNameSpaceGenerator\UnifiedNamespaceClassMapProvider;
 use PHPUnit\Framework\TestCase;
@@ -38,33 +41,32 @@ class UnifiedNamespaceClassMapProviderTest extends TestCase
         $unifiedNameSpaceClassMapProvider->getClassMap();
     }
 
-    //phpcs:disable
-    public function providerClassMapsAndEditions(): array
+    public static function classMapsAndEditionsDataProvider(): array
     {
         return [
             'ce_edition' => [
                 'CE',
                 [
                     'OxidEsales\Eshop\ClassExistsOnlyInCommunityEdition'            => [
-                        'editionClassName' => \OxidEsales\EshopCommunity\ClassExistsOnlyInCommunityEdition::class,
+                        'editionClassName' => EshopCommunity\ClassExistsOnlyInCommunityEdition::class,
                         'isAbstract'       => false,
                         'isInterface'      => false,
                         'isDeprecated'     => false
                     ],
                     'OxidEsales\Eshop\ClassExistsInCommunityAndProfessionalEdition' => [
-                        'editionClassName' => \OxidEsales\EshopCommunity\ClassExistsInCommunityAndProfessionalEdition::class,
+                        'editionClassName' => EshopCommunity\ClassExistsInCommunityAndProfessionalEdition::class,
                         'isAbstract'       => false,
                         'isInterface'      => false,
                         'isDeprecated'     => false
                     ],
                     'OxidEsales\Eshop\ClassExistsInAllEditions'                     => [
-                        'editionClassName' => \OxidEsales\EshopCommunity\ClassExistsInAllEditions::class,
+                        'editionClassName' => EshopCommunity\ClassExistsInAllEditions::class,
                         'isAbstract'       => false,
                         'isInterface'      => false,
                         'isDeprecated'     => false
                     ],
                     'OxidEsales\Eshop\AbstractClassExistsInAllEditions'             => [
-                        'editionClassName' => \OxidEsales\EshopCommunity\AbstractClassExistsInAllEditions::class,
+                        'editionClassName' => EshopCommunity\AbstractClassExistsInAllEditions::class,
                         'isAbstract'       => true,
                         'isInterface'      => false,
                         'isDeprecated'     => false
@@ -75,25 +77,25 @@ class UnifiedNamespaceClassMapProviderTest extends TestCase
                 'PE',
                 [
                     'OxidEsales\Eshop\ClassExistsOnlyInCommunityEdition'            => [
-                        'editionClassName' => \OxidEsales\EshopCommunity\ClassExistsOnlyInCommunityEdition::class,
+                        'editionClassName' => EshopCommunity\ClassExistsOnlyInCommunityEdition::class,
                         'isAbstract'       => false,
                         'isInterface'      => false,
                         'isDeprecated'     => false
                     ],
                     'OxidEsales\Eshop\ClassExistsInCommunityAndProfessionalEdition' => [
-                        'editionClassName' => \OxidEsales\EshopProfessional\ClassExistsInCommunityAndProfessionalEdition::class,
+                        'editionClassName' => EshopProfessional\ClassExistsInCommunityAndProfessionalEdition::class,
                         'isAbstract'       => false,
                         'isInterface'      => false,
                         'isDeprecated'     => false
                     ],
                     'OxidEsales\Eshop\ClassExistsInAllEditions'                     => [
-                        'editionClassName' => \OxidEsales\EshopProfessional\ClassExistsInAllEditions::class,
+                        'editionClassName' => EshopProfessional\ClassExistsInAllEditions::class,
                         'isAbstract'       => false,
                         'isInterface'      => false,
                         'isDeprecated'     => false
                     ],
                     'OxidEsales\Eshop\AbstractClassExistsInAllEditions'             => [
-                        'editionClassName' => \OxidEsales\EshopProfessional\AbstractClassExistsInAllEditions::class,
+                        'editionClassName' => EshopProfessional\AbstractClassExistsInAllEditions::class,
                         'isAbstract'       => true,
                         'isInterface'      => false,
                         'isDeprecated'     => false
@@ -104,25 +106,25 @@ class UnifiedNamespaceClassMapProviderTest extends TestCase
                 'EE',
                 [
                     'OxidEsales\Eshop\ClassExistsOnlyInCommunityEdition'            => [
-                        'editionClassName' => \OxidEsales\EshopCommunity\ClassExistsOnlyInCommunityEdition::class,
+                        'editionClassName' => EshopCommunity\ClassExistsOnlyInCommunityEdition::class,
                         'isAbstract'       => false,
                         'isInterface'      => false,
                         'isDeprecated'     => false
                     ],
                     'OxidEsales\Eshop\ClassExistsInCommunityAndProfessionalEdition' => [
-                        'editionClassName' => \OxidEsales\EshopProfessional\ClassExistsInCommunityAndProfessionalEdition::class,
+                        'editionClassName' => EshopProfessional\ClassExistsInCommunityAndProfessionalEdition::class,
                         'isAbstract'       => false,
                         'isInterface'      => false,
                         'isDeprecated'     => false
                     ],
                     'OxidEsales\Eshop\ClassExistsInAllEditions'                     => [
-                        'editionClassName' => \OxidEsales\EshopEnterprise\ClassExistsInAllEditions::class,
+                        'editionClassName' => EshopEnterprise\ClassExistsInAllEditions::class,
                         'isAbstract'       => false,
                         'isInterface'      => false,
                         'isDeprecated'     => false
                     ],
                     'OxidEsales\Eshop\AbstractClassExistsInAllEditions'             => [
-                        'editionClassName' => \OxidEsales\EshopEnterprise\AbstractClassExistsInAllEditions::class,
+                        'editionClassName' => EshopEnterprise\AbstractClassExistsInAllEditions::class,
                         'isAbstract'       => true,
                         'isInterface'      => false,
                         'isDeprecated'     => false
@@ -133,7 +135,7 @@ class UnifiedNamespaceClassMapProviderTest extends TestCase
     }
 
     /**
-     * @dataProvider providerClassMapsAndEditions
+     * @dataProvider classMapsAndEditionsDataProvider
      */
     public function testGetClassMapValid(string $edition, array $expectedClassMap): void
     {
