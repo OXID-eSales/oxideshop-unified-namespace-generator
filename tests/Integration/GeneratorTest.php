@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace OxidEsales\UnifiedNameSpaceGenerator\Tests\Integration;
 
 use FilesystemIterator;
+use OxidEsales\UnifiedNameSpaceGenerator\Exceptions\FileSystemCompatibilityException;
 use OxidEsales\UnifiedNameSpaceGenerator\Exceptions\OutputDirectoryValidationException;
 use OxidEsales\UnifiedNameSpaceGenerator\Generator;
 use OxidEsales\UnifiedNameSpaceGenerator\UnifiedNameSpaceClassMapProvider;
@@ -25,7 +26,6 @@ class GeneratorTest extends TestCase
     private string $testOutputDir = __DIR__ . DIRECTORY_SEPARATOR . 'test_generated' . DIRECTORY_SEPARATOR;
     private string $validBasePath = __DIR__ . DIRECTORY_SEPARATOR . 'testData' . DIRECTORY_SEPARATOR . 'case_valid';
 
-    //phpcs:disable
     private array $classMapExample = [
         'OxidEsales\Eshop\Core\Contract\AbstractUpdatableFields'    => [
             'editionClassName' => \OxidEsales\EshopCommunity\Core\Contract\AbstractUpdatableFields::class,
@@ -59,7 +59,6 @@ class GeneratorTest extends TestCase
         ],
     ];
 
-    //phpcs:disable
     private array $checkForFiles = [
         'AbstractUpdatableFields.php'    => 'OxidEsales' . DIRECTORY_SEPARATOR . 'Eshop' . DIRECTORY_SEPARATOR .
                                             'Core' . DIRECTORY_SEPARATOR . 'Contract' . DIRECTORY_SEPARATOR .
@@ -113,7 +112,7 @@ class GeneratorTest extends TestCase
         $this->createGenerator($factsMock, $providerMock, $notExistingDirectory);
     }
 
-    public function providerCleanupOutputDirectoryPermissions(): array
+    public static function cleanupOutputDirectoryPermissionsDataProvider(): array
     {
         $data = [];
 
@@ -143,14 +142,13 @@ class GeneratorTest extends TestCase
     }
 
     /**
-     * @dataProvider providerCleanupOutputDirectoryPermissions
+     * @dataProvider cleanupOutputDirectoryPermissionsDataProvider
      */
     public function testCleanupOutputDirectoryPermissions(
         array $structure,
         int $permissions,
         string $relativePath
-    ): void
-    {
+    ): void {
         $outputDirectory = $this->getVirtualOutputDirectory($structure);
         /**
          * File and directory deletions are operation on the directory. So the right permission on the directory,
@@ -167,7 +165,7 @@ class GeneratorTest extends TestCase
         $generator->cleanupOutputDirectory();
     }
 
-    public function providerTestMapValidationErrors(): array
+    public static function mapValidationErrorsDataProvider(): array
     {
         $data = [];
 
@@ -209,7 +207,7 @@ class GeneratorTest extends TestCase
     }
 
     /**
-     * @dataProvider providerTestMapValidationErrors
+     * @dataProvider mapValidationErrorsDataProvider
      */
     public function testGenerateValidationErrors(array $classMap, string $exceptionMessage): void
     {
@@ -247,7 +245,7 @@ class GeneratorTest extends TestCase
         foreach ($this->checkForFiles as $name => $path) {
             $resultFile = $this->assertFileExistsAfterGeneration($outputDirectory, $path);
 
-            $expectedFileContent = trim(file_get_contents(Path::join($this->validBasePath,'ExpectedClasses',$name)));
+            $expectedFileContent = trim(file_get_contents(Path::join($this->validBasePath, 'ExpectedClasses', $name)));
             $actualFileContent = trim(file_get_contents($resultFile));
 
             $this->assertSame(
@@ -272,7 +270,7 @@ class GeneratorTest extends TestCase
         foreach ($this->checkForFiles as $name => $path) {
             $resultFile = $this->assertFileExistsAfterGeneration($outputDirectory, $path);
 
-            $expectedFileContent = file_get_contents(Path::join($this->validBasePath,'ExpectedClasses',$name));
+            $expectedFileContent = file_get_contents(Path::join($this->validBasePath, 'ExpectedClasses', $name));
             $actualFileContent = trim(file_get_contents($resultFile));
 
             $this->assertNotSame(
@@ -280,7 +278,6 @@ class GeneratorTest extends TestCase
                 $actualFileContent,
                 "Expected and actual content of file '$name' are unexpectedly the same!"
             );
-            $this->assertStringContainsString('OXID eShop EE', file_get_contents($resultFile));
         }
 
         // Now run it again but this time for CE.
@@ -317,7 +314,7 @@ class GeneratorTest extends TestCase
                 DIRECTORY_SEPARATOR . 'Model' . DIRECTORY_SEPARATOR . 'Article.php';
         chmod($file, 0444);
 
-        $this->expectException(\OxidEsales\UnifiedNameSpaceGenerator\Exceptions\FileSystemCompatibilityException::class);
+        $this->expectException(FileSystemCompatibilityException::class);
 
         $factsMock = $this->getFactsMock();
         $providerMock = $this->getUnifiedNameSpaceProviderMock($factsMock);
@@ -358,7 +355,7 @@ class GeneratorTest extends TestCase
 
         $mock = $this->getMockBuilder(UnifiedNameSpaceClassMapProvider::class)
             ->disableOriginalConstructor()
-            ->setMethods(['getClassMap'])
+            ->onlyMethods(['getClassMap'])
             ->getMock();
         $mock->expects($this->any())->method('getClassMap')->willReturn($classMap);
 

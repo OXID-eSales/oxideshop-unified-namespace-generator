@@ -18,5 +18,4 @@ namespace OxidEsales\Eshop\Core\Contract;
  */
 interface ClassNameResolverInterface extends \OxidEsales\EshopCommunity\Core\Contract\ClassNameResolverInterface
 {
-
 }

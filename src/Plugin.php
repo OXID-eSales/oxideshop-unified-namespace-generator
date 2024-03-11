@@ -43,7 +43,10 @@ class Plugin implements PluginInterface, EventSubscriberInterface
     {
         $generator = $this->getGenerator();
         try {
-            $this->io->write('<info>Generating OXID eShop unified namespace classes ... </info>', false);
+            $this->io->write(
+                '<info>Generating OXID eShop unified namespace classes ... </info>',
+                false
+            );
             $generator->cleanupOutputDirectory();
             $generator->generate();
             $this->io->write('<info>Done</info>');
@@ -51,7 +54,9 @@ class Plugin implements PluginInterface, EventSubscriberInterface
             $this->io->writeError('<error>Failed</error>');
             $this->io->writeError('<error>Error: ' . $exception->getMessage() . '</error>');
             $this->io->writeError('<error>Code: ' . $exception->getCode() . '</error>');
-            $this->io->writeError('<error>Stacktrace: ' . PHP_EOL . $exception->getTraceAsString() . '</error>');
+            $this->io->writeError(
+                '<error>Stacktrace: ' . PHP_EOL . $exception->getTraceAsString() . '</error>'
+            );
         }
     }
 

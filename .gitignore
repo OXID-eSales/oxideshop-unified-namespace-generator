@@ -3,5 +3,3 @@ vendor/
 composer.lock
 generated
 !generated/.gitkeep
-src/templates_c
-!src/templates_c/.gitkeep

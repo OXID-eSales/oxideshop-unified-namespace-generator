@@ -12,20 +12,21 @@ namespace OxidEsales\UnifiedNameSpaceGenerator;
 use FilesystemIterator;
 use OxidEsales\Facts\Edition\EditionSelector;
 use OxidEsales\Facts\Facts;
+use OxidEsales\UnifiedNameSpaceGenerator\Exceptions\FileSystemCompatibilityException;
 use OxidEsales\UnifiedNameSpaceGenerator\Exceptions\OutputDirectoryValidationException;
+use OxidEsales\UnifiedNameSpaceGenerator\Exceptions\PermissionException;
 use Symfony\Component\Filesystem\Filesystem;
-use Symfony\Component\Templating\Loader\FilesystemLoader;
-use Symfony\Component\Templating\PhpEngine;
-use Symfony\Component\Templating\TemplateNameParser;
 use Symfony\Component\Filesystem\Path;
+use Twig\Environment;
+use Twig\Loader\FilesystemLoader;
 
 class Generator
 {
     public function __construct(
         private readonly Facts $facts,
         private readonly UnifiedNameSpaceClassMapProvider $unifiedNameSpaceClassMapProvider,
-        //phpcs:disable
-        private readonly string $outputDirectory = __DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'generated' . DIRECTORY_SEPARATOR,
+        private readonly string $outputDirectory = __DIR__ . DIRECTORY_SEPARATOR . '..' .
+        DIRECTORY_SEPARATOR . 'generated' . DIRECTORY_SEPARATOR,
         private readonly string $templateDir = __DIR__ . DIRECTORY_SEPARATOR . 'templates' . DIRECTORY_SEPARATOR,
         private string $shopEdition = '',
         protected readonly string $communityEdition = EditionSelector::COMMUNITY,
@@ -92,7 +93,6 @@ class Generator
 
             $this->validateEditionClassDescription($editionClassDescription);
             $unifiedNameSpace[$unifiedSubNamespace][] = [
-                // Interfaces are abstract for Reflection too, here we want just abstract classes
                 'isAbstract'            => $editionClassDescription['isAbstract'],
                 'isInterface'           => $editionClassDescription['isInterface'],
                 'isDeprecated'          => $editionClassDescription['isDeprecated'],
@@ -114,7 +114,8 @@ class Generator
         foreach ($editionClassDescriptions as $editionClassDescription) {
             $shortUnifiedClassName = $editionClassDescription['shortUnifiedClassName'];
             $filePath = Path::join($subNamespacePath, $shortUnifiedClassName . '.php');
-            $fullyQualifiedUnifiedClass = '\\' . trim($unifiedSubNamespace . '\\' . $shortUnifiedClassName, '\\');
+            $fullyQualifiedUnifiedClass = '\\' . trim($unifiedSubNamespace .
+                    '\\' . $shortUnifiedClassName, '\\');
 
             $backwardsCompatibleClass = $this->getBackwardsCompatibleClass(
                 $fullyQualifiedUnifiedClass,
@@ -135,8 +136,7 @@ class Generator
     private function getBackwardsCompatibleClass(
         string $fullyQualifiedUnifiedClass,
         array $backwardsCompatibilityMap
-    ): ?string
-    {
+    ): ?string {
         $backwardsCompatibilityMapIndex = trim($fullyQualifiedUnifiedClass, '\\');
 
         return $backwardsCompatibilityMap[$backwardsCompatibilityMapIndex] ?? null;
@@ -148,9 +148,9 @@ class Generator
         string $fullyQualifiedUnifiedClass,
         ?string $backwardsCompatibleClass
     ): string {
-        $templating = $this->getTemplatingEngine();
+        $twig = $this->getTwig();
 
-        return $templating->render('class_file_template.php', [
+        return $twig->render('class_file_template.html.twig', [
             'shopEdition' => $this->shopEdition,
             'class' => $editionClassDescription,
             'namespace' => $unifiedSubNamespace,
@@ -165,7 +165,7 @@ class Generator
 
         $currentDirectory = dirname($filePath);
         if (!is_writable($currentDirectory)) {
-            throw new \OxidEsales\UnifiedNameSpaceGenerator\Exceptions\PermissionException(
+            throw new PermissionException(
                 sprintf(
                     'Could not create file %s. The directory %s is not writable for user "%s".' .
                     'Please fix the permissions on this directory and run this script again.',
@@ -179,7 +179,7 @@ class Generator
 
         $fileHandle = fopen($filePath, 'wb');
         if (!$fileHandle) {
-            throw new \OxidEsales\UnifiedNameSpaceGenerator\Exceptions\FileSystemCompatibilityException(
+            throw new FileSystemCompatibilityException(
                 sprintf(
                     'Could not open file handle for %s. There might be a problem with your file system.' .
                     'Try to solve this problem and run this script again.',
@@ -236,8 +236,7 @@ class Generator
     protected function validateShortUnifiedClassName(
         string $shortUnifiedClassName,
         string $fullyQualifiedUnifiedClass
-    ): void
-    {
+    ): void {
         if (!$shortUnifiedClassName) {
             throw new \Exception(
                 'Could not extract short unified a class name from string ' . $fullyQualifiedUnifiedClass,
@@ -298,16 +297,16 @@ class Generator
     {
         $this->validateOutputDirectoryPermissions();
 
-        $unifiedSubNamespacePath = Path::join($this->outputDirectory,$unifiedSubNamespace);
+        $unifiedSubNamespacePath = Path::join($this->outputDirectory, $unifiedSubNamespace);
         $this->fileSystem->mkdir($unifiedSubNamespacePath, 0755);
 
         return $unifiedSubNamespacePath;
     }
 
-    protected function getTemplatingEngine(): PhpEngine
+    protected function getTwig(): Environment
     {
-        $filesystemLoader = new FilesystemLoader($this->templateDir . '%name%');
+        $loader = new FilesystemLoader($this->templateDir);
 
-        return new PhpEngine(new TemplateNameParser(), $filesystemLoader);
+        return new Environment($loader);
     }
 }
