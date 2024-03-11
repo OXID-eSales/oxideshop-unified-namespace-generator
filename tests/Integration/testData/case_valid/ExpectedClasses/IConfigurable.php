@@ -18,7 +18,6 @@ namespace OxidEsales\Eshop\Core\Contract;
  */
 interface IConfigurable extends \OxidEsales\EshopCommunity\Core\Contract\IConfigurable
 {
-
 }
 
 /**

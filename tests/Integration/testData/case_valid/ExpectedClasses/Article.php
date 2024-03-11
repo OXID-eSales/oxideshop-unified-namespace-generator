@@ -20,7 +20,6 @@ namespace OxidEsales\Eshop\Application\Model;
  */
 class Article extends \OxidEsales\EshopCommunity\Application\Model\Article
 {
-
 }
 
 /**
