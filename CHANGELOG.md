@@ -10,6 +10,7 @@
 
 ### Removed
 - PHPUnit v9 support
+- PHP v8.1 support
 
 ## v5.0.0 - 2024-03-15
 

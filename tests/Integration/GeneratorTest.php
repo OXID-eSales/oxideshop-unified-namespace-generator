@@ -125,7 +125,7 @@ class GeneratorTest extends TestCase
                     'emptyFolder' => []
                 ]],
             'permissions'   => 0444,
-            'relative_path' => 'sub'
+            'relativePath' => 'sub'
         ];
 
         // Test case that a sub directory cannot be deleted
@@ -135,7 +135,7 @@ class GeneratorTest extends TestCase
                     'sub' => ['subsub' => []]
                 ]],
             'permissions'   => 0444,
-            'relative_path' => 'sub'
+            'relativePath' => 'sub'
         ];
 
         return $data;
