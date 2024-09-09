@@ -9,7 +9,6 @@ declare(strict_types=1);
 
 namespace OxidEsales\UnifiedNameSpaceGenerator;
 
-use OxidEsales\Facts\Edition\EditionSelector;
 use OxidEsales\Facts\Facts;
 use OxidEsales\UnifiedNameSpaceGenerator\UnifiedNamespaceClassMap\CommunityEditionUnifiedNamespaceClassMap;
 use OxidEsales\UnifiedNameSpaceGenerator\UnifiedNamespaceClassMap\ProfessionalEditionUnifiedNamespaceClassMap;
@@ -28,15 +27,15 @@ class UnifiedNameSpaceClassMapProvider
         $unifiedNamespaceClassMap = null;
 
         switch ($shopEdition) {
-            case EditionSelector::COMMUNITY:
+            case Facts::COMMUNITY:
                 $unifiedNamespaceClassMap =
                     new CommunityEditionUnifiedNamespaceClassMap($this->facts);
                 break;
-            case EditionSelector::PROFESSIONAL:
+            case Facts::PROFESSIONAL:
                 $unifiedNamespaceClassMap =
                     new ProfessionalEditionUnifiedNamespaceClassMap($this->facts);
                 break;
-            case EditionSelector::ENTERPRISE:
+            case Facts::ENTERPRISE:
                 $unifiedNamespaceClassMap =
                     new EnterpriseEditionUnifiedNamespaceClassMap($this->facts);
         }

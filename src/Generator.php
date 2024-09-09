@@ -10,7 +10,6 @@ declare(strict_types=1);
 namespace OxidEsales\UnifiedNameSpaceGenerator;
 
 use FilesystemIterator;
-use OxidEsales\Facts\Edition\EditionSelector;
 use OxidEsales\Facts\Facts;
 use OxidEsales\UnifiedNameSpaceGenerator\Exceptions\FileSystemCompatibilityException;
 use OxidEsales\UnifiedNameSpaceGenerator\Exceptions\OutputDirectoryValidationException;
@@ -29,12 +28,9 @@ class Generator
         DIRECTORY_SEPARATOR . 'generated' . DIRECTORY_SEPARATOR,
         private readonly string $templateDir = __DIR__ . DIRECTORY_SEPARATOR . 'templates' . DIRECTORY_SEPARATOR,
         private string $shopEdition = '',
-        /** @deprecated will be removed in next major */
-        protected readonly string $communityEdition = EditionSelector::COMMUNITY,
-        /** @deprecated will be removed in next major */
-        protected readonly string $professionalEdition = EditionSelector::PROFESSIONAL,
-        /** @deprecated will be removed in next major */
-        protected readonly string $enterpriseEdition = EditionSelector::ENTERPRISE,
+        protected readonly string $communityEdition = Facts::COMMUNITY,
+        protected readonly string $professionalEdition = Facts::PROFESSIONAL,
+        protected readonly string $enterpriseEdition = Facts::ENTERPRISE,
         private readonly Filesystem $fileSystem = new Filesystem(),
     ) {
         $this->validateOutputDirectoryPermissions();
@@ -76,9 +72,6 @@ class Generator
         }
     }
 
-    /**
-     * @deprecated will be removed in next major
-     */
     protected function getBackwardsCompatibilityMap(): array
     {
         $backwardsCompatibilityClassMapProvider = new BackwardsCompatibilityClassMapProvider($this->facts);
@@ -251,9 +244,6 @@ class Generator
         }
     }
 
-    /**
-     * @deprecated will be removed in next major
-     */
     protected function validateShopEdition(string $shopEdition): void
     {
         $expectedShopEditions = [$this->communityEdition, $this->professionalEdition, $this->enterpriseEdition];
