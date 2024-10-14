@@ -16,7 +16,7 @@
     "phpunit/phpunit": "^10.4",
     "symfony/yaml": "*"
   },
-  "minimum-stability": "stable",
+  "minimum-stability": "dev",
   "prefer-stable": true,
   "autoload": {
     "psr-4": {
