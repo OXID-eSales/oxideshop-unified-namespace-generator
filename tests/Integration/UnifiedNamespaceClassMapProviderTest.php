@@ -14,6 +14,7 @@ use OxidEsales\EshopProfessional;
 use OxidEsales\EshopEnterprise;
 use OxidEsales\UnifiedNameSpaceGenerator\Exceptions\InvalidUnifiedNamespaceClassMapException;
 use OxidEsales\UnifiedNameSpaceGenerator\UnifiedNamespaceClassMapProvider;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 class UnifiedNamespaceClassMapProviderTest extends TestCase
@@ -134,9 +135,7 @@ class UnifiedNamespaceClassMapProviderTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider classMapsAndEditionsDataProvider
-     */
+    #[DataProvider('classMapsAndEditionsDataProvider')]
     public function testGetClassMapValid(string $edition, array $expectedClassMap): void
     {
         $this->copyTestDataIntoVirtualFileSystem('case_valid');

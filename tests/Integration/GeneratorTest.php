@@ -14,6 +14,7 @@ use OxidEsales\UnifiedNameSpaceGenerator\Exceptions\FileSystemCompatibilityExcep
 use OxidEsales\UnifiedNameSpaceGenerator\Exceptions\OutputDirectoryValidationException;
 use OxidEsales\UnifiedNameSpaceGenerator\Generator;
 use OxidEsales\UnifiedNameSpaceGenerator\UnifiedNameSpaceClassMapProvider;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Filesystem\Path;
@@ -141,9 +142,7 @@ class GeneratorTest extends TestCase
         return $data;
     }
 
-    /**
-     * @dataProvider cleanupOutputDirectoryPermissionsDataProvider
-     */
+    #[DataProvider('cleanupOutputDirectoryPermissionsDataProvider')]
     public function testCleanupOutputDirectoryPermissions(
         array $structure,
         int $permissions,
@@ -206,9 +205,7 @@ class GeneratorTest extends TestCase
         return $data;
     }
 
-    /**
-     * @dataProvider mapValidationErrorsDataProvider
-     */
+    #[DataProvider('mapValidationErrorsDataProvider')]
     public function testGenerateValidationErrors(array $classMap, string $exceptionMessage): void
     {
         $this->expectException(\Exception::class, $exceptionMessage);
