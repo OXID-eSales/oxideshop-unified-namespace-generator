@@ -22,7 +22,6 @@ use Symfony\Component\Filesystem\Path;
 class GeneratorTest extends TestCase
 {
     use VfsStreamTrait;
-    use FactsMockTrait;
 
     private string $testOutputDir = __DIR__ . DIRECTORY_SEPARATOR . 'test_generated' . DIRECTORY_SEPARATOR;
     private string $validBasePath = __DIR__ . DIRECTORY_SEPARATOR . 'testData' . DIRECTORY_SEPARATOR . 'case_valid';

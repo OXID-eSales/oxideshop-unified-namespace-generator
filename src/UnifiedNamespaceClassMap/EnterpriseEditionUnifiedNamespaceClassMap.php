@@ -9,7 +9,8 @@ declare(strict_types=1);
 
 namespace OxidEsales\UnifiedNameSpaceGenerator\UnifiedNamespaceClassMap;
 
-use OxidEsales\Facts\Facts;
+use OxidEsales\EshopCommunity\Internal\Framework\Edition;
+use OxidEsales\EshopCommunity\Internal\Framework\FileSystem\EditionDirectoriesLocator;
 
 /**
  * @deprecated will be removed in next major
@@ -17,18 +18,18 @@ use OxidEsales\Facts\Facts;
 class EnterpriseEditionUnifiedNamespaceClassMap extends ProfessionalEditionUnifiedNamespaceClassMap
 {
     public function __construct(
-        protected Facts $facts,
-        protected string $editionText = "OXID eShop Enterprise Edition was chosen."
+        protected string $editionText = 'OXID eShop Enterprise Edition was chosen.'
     ) {
-        parent::__construct($facts, $editionText);
+        parent::__construct($editionText);
     }
 
     public function getClassMap(): array
     {
         $unifiedNamespaceClassMapProfessionalEdition = parent::getClassMap();
 
-        $enterpriseEditionRootPath = $this->facts->getEnterpriseEditionRootPath();
-        $unifiedNamespaceClassMapEnterpriseEdition = $this->resolveUnifiedNamespaceClassMap($enterpriseEditionRootPath);
+        $unifiedNamespaceClassMapEnterpriseEdition = $this->resolveUnifiedNamespaceClassMap(
+            (new EditionDirectoriesLocator())->getEditionSourcePath(Edition::Enterprise)
+        );
 
         return array_merge($unifiedNamespaceClassMapProfessionalEdition, $unifiedNamespaceClassMapEnterpriseEdition);
     }

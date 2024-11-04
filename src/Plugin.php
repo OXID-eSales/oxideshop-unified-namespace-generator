@@ -14,8 +14,6 @@ use Composer\EventDispatcher\EventSubscriberInterface;
 use Composer\IO\IOInterface;
 use Composer\Plugin\PluginInterface;
 use Composer\Script\ScriptEvents;
-use http\Exception\BadMethodCallException;
-use OxidEsales\Facts\Facts;
 
 /**
  * The composer plugin entry point class.
@@ -62,10 +60,7 @@ class Plugin implements PluginInterface, EventSubscriberInterface
 
     protected function getGenerator(): Generator
     {
-        $facts = new Facts();
-        $unifiedNameSpaceClassMapProvider = new UnifiedNameSpaceClassMapProvider($facts);
-
-        return new Generator($facts, $unifiedNameSpaceClassMapProvider);
+        return new Generator(new UnifiedNameSpaceClassMapProvider());
     }
 
     public function deactivate(Composer $composer, IOInterface $io)

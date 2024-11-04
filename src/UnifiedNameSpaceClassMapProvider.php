@@ -9,43 +9,22 @@ declare(strict_types=1);
 
 namespace OxidEsales\UnifiedNameSpaceGenerator;
 
-use OxidEsales\Facts\Facts;
+use OxidEsales\EshopCommunity\Internal\Framework\Edition;
+use OxidEsales\EshopCommunity\Internal\Framework\FileSystem\EditionResolver;
 use OxidEsales\UnifiedNameSpaceGenerator\UnifiedNamespaceClassMap\CommunityEditionUnifiedNamespaceClassMap;
-use OxidEsales\UnifiedNameSpaceGenerator\UnifiedNamespaceClassMap\ProfessionalEditionUnifiedNamespaceClassMap;
 use OxidEsales\UnifiedNameSpaceGenerator\UnifiedNamespaceClassMap\EnterpriseEditionUnifiedNamespaceClassMap;
-use OxidEsales\UnifiedNameSpaceGenerator\Exceptions\InvalidEditionException;
+use OxidEsales\UnifiedNameSpaceGenerator\UnifiedNamespaceClassMap\ProfessionalEditionUnifiedNamespaceClassMap;
 
 class UnifiedNameSpaceClassMapProvider
 {
-    public function __construct(private readonly Facts $facts)
-    {
-    }
-
     public function getClassMap(): array
     {
-        $shopEdition = $this->facts->getEdition();
-        $unifiedNamespaceClassMap = null;
-
-        switch ($shopEdition) {
-            case Facts::COMMUNITY:
-                $unifiedNamespaceClassMap =
-                    new CommunityEditionUnifiedNamespaceClassMap($this->facts);
-                break;
-            case Facts::PROFESSIONAL:
-                $unifiedNamespaceClassMap =
-                    new ProfessionalEditionUnifiedNamespaceClassMap($this->facts);
-                break;
-            case Facts::ENTERPRISE:
-                $unifiedNamespaceClassMap =
-                    new EnterpriseEditionUnifiedNamespaceClassMap($this->facts);
-        }
-
-        if (is_null($unifiedNamespaceClassMap)) {
-            throw new InvalidEditionException(
-                'The OXID eShop edition could not be detected. Be sure to setup your OXID eShop correctly.'
-            );
-        }
-
-        return $unifiedNamespaceClassMap->getClassMap();
+        return match (
+            (new EditionResolver())->getEdition()
+        ) {
+            Edition::Community => (new CommunityEditionUnifiedNamespaceClassMap())->getClassMap(),
+            Edition::Professional => (new ProfessionalEditionUnifiedNamespaceClassMap())->getClassMap(),
+            Edition::Enterprise => (new EnterpriseEditionUnifiedNamespaceClassMap())->getClassMap(),
+        };
     }
 }

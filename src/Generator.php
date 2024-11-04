@@ -10,7 +10,7 @@ declare(strict_types=1);
 namespace OxidEsales\UnifiedNameSpaceGenerator;
 
 use FilesystemIterator;
-use OxidEsales\Facts\Facts;
+use OxidEsales\EshopCommunity\Internal\Framework\FileSystem\EditionResolver;
 use OxidEsales\UnifiedNameSpaceGenerator\Exceptions\FileSystemCompatibilityException;
 use OxidEsales\UnifiedNameSpaceGenerator\Exceptions\OutputDirectoryValidationException;
 use OxidEsales\UnifiedNameSpaceGenerator\Exceptions\PermissionException;
@@ -22,21 +22,13 @@ use Twig\Loader\FilesystemLoader;
 class Generator
 {
     public function __construct(
-        private readonly Facts $facts,
         private readonly UnifiedNameSpaceClassMapProvider $unifiedNameSpaceClassMapProvider,
         private readonly string $outputDirectory = __DIR__ . DIRECTORY_SEPARATOR . '..' .
         DIRECTORY_SEPARATOR . 'generated' . DIRECTORY_SEPARATOR,
         private readonly string $templateDir = __DIR__ . DIRECTORY_SEPARATOR . 'templates' . DIRECTORY_SEPARATOR,
-        private string $shopEdition = '',
-        protected readonly string $communityEdition = Facts::COMMUNITY,
-        protected readonly string $professionalEdition = Facts::PROFESSIONAL,
-        protected readonly string $enterpriseEdition = Facts::ENTERPRISE,
         private readonly Filesystem $fileSystem = new Filesystem(),
     ) {
         $this->validateOutputDirectoryPermissions();
-
-        $this->shopEdition = $facts->getEdition();
-        $this->validateShopEdition($this->shopEdition);
     }
 
     public function cleanupOutputDirectory(): void
@@ -74,8 +66,7 @@ class Generator
 
     protected function getBackwardsCompatibilityMap(): array
     {
-        $backwardsCompatibilityClassMapProvider = new BackwardsCompatibilityClassMapProvider($this->facts);
-        return $backwardsCompatibilityClassMapProvider->getClassMap();
+        return (new BackwardsCompatibilityClassMapProvider())->getClassMap();
     }
 
     protected function getUnifiedNamespaceArray(array $classMap): array
@@ -147,15 +138,17 @@ class Generator
         string $fullyQualifiedUnifiedClass,
         ?string $backwardsCompatibleClass
     ): string {
-        $twig = $this->getTwig();
-
-        return $twig->render('class_file_template.html.twig', [
-            'shopEdition' => $this->shopEdition,
-            'class' => $editionClassDescription,
-            'namespace' => $unifiedSubNamespace,
-            'fullyQualifiedUnifiedClass' => $fullyQualifiedUnifiedClass,
-            'backwardsCompatibleClass' => $backwardsCompatibleClass,
-        ]);
+        return $this->getTwig()
+            ->render(
+                'class_file_template.html.twig',
+                [
+                    'shopEdition' => (new EditionResolver())->getEdition()->value,
+                    'class' => $editionClassDescription,
+                    'namespace' => $unifiedSubNamespace,
+                    'fullyQualifiedUnifiedClass' => $fullyQualifiedUnifiedClass,
+                    'backwardsCompatibleClass' => $backwardsCompatibleClass,
+                ]
+            );
     }
 
     protected function writeFile(string $filePath, string $content): void
@@ -165,7 +158,7 @@ class Generator
         $currentDirectory = dirname($filePath);
         if (!is_writable($currentDirectory)) {
             throw new PermissionException(
-                sprintf(
+                \sprintf(
                     'Could not create file %s. The directory %s is not writable for user "%s".' .
                     'Please fix the permissions on this directory and run this script again.',
                     $filePath,
@@ -179,7 +172,7 @@ class Generator
         $fileHandle = fopen($filePath, 'wb');
         if (!$fileHandle) {
             throw new FileSystemCompatibilityException(
-                sprintf(
+                \sprintf(
                     'Could not open file handle for %s. There might be a problem with your file system.' .
                     'Try to solve this problem and run this script again.',
                     $filePath
@@ -192,12 +185,12 @@ class Generator
         fclose($fileHandle);
         if ($result === false) {
             throw new \Exception(
-                sprintf('Could not create file %s', $filePath)
+                \sprintf('Could not create file %s', $filePath)
             );
         }
         if ($result === 0) {
             throw new \Exception(
-                sprintf('Created empty file %s', $filePath),
+                \sprintf('Created empty file %s', $filePath),
                 ErrorEnum::CODE_FILE_CREATION_ERROR->value
             );
         }
@@ -244,18 +237,6 @@ class Generator
         }
     }
 
-    protected function validateShopEdition(string $shopEdition): void
-    {
-        $expectedShopEditions = [$this->communityEdition, $this->professionalEdition, $this->enterpriseEdition];
-        if (!in_array($this->shopEdition, $expectedShopEditions)) {
-            throw new \InvalidArgumentException(
-                'Parameter $shopEdition has an unexpected value: "' . $shopEdition . '". ' .
-                'Expected values are: "' . implode(',', $expectedShopEditions) . '". ',
-                ErrorEnum::CODE_INVALID_SHOP_EDITION->value
-            );
-        }
-    }
-
     protected function validateUnifiedNamespaceArray(array $unifiedNamespaceArray): void
     {
         if (empty($unifiedNamespaceArray)) {
@@ -270,7 +251,7 @@ class Generator
     {
         if (!is_dir($this->outputDirectory)) {
             throw new OutputDirectoryValidationException(
-                sprintf(
+                \sprintf(
                     'The directory "%s" where the class files have to be written to does not exist. Please ' .
                     'create the directory "%s" with write permissions for the user "%s" and run this script again',
                     $this->outputDirectory,
@@ -279,9 +260,11 @@ class Generator
                 ),
                 ErrorEnum::CODE_DIRECTORY_CREATION_ERROR->value
             );
-        } elseif (!is_writable($this->outputDirectory)) {
+        }
+
+        if (!is_writable($this->outputDirectory)) {
             throw new OutputDirectoryValidationException(
-                sprintf(
+                \sprintf(
                     'The directory "%s" where the class files have to be written to is not writable for user ' .
                     '"%s". Please fix the permissions on this directory and run this script again',
                     realpath($this->outputDirectory),

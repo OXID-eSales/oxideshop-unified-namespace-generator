@@ -20,7 +20,6 @@ use PHPUnit\Framework\TestCase;
 class UnifiedNamespaceClassMapProviderTest extends TestCase
 {
     use VfsStreamTrait;
-    use FactsMockTrait;
 
     public function testGetClassMapMapNotAvailable(): void
     {

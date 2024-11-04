@@ -16,7 +16,6 @@ use PHPUnit\Framework\TestCase;
 class BackwardsCompatibilityClassMapProviderTest extends TestCase
 {
     use VfsStreamTrait;
-    use FactsMockTrait;
 
     public function testGetClassMapDoesNotFindClassMap(): void
     {

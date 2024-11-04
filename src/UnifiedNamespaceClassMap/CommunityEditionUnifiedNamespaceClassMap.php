@@ -9,7 +9,8 @@ declare(strict_types=1);
 
 namespace OxidEsales\UnifiedNameSpaceGenerator\UnifiedNamespaceClassMap;
 
-use OxidEsales\Facts\Facts;
+use OxidEsales\EshopCommunity\Internal\Framework\Edition;
+use OxidEsales\EshopCommunity\Internal\Framework\FileSystem\EditionDirectoriesLocator;
 use OxidEsales\UnifiedNameSpaceGenerator\ErrorEnum;
 use OxidEsales\UnifiedNameSpaceGenerator\Exceptions\InvalidUnifiedNamespaceClassMapException;
 use Symfony\Component\Filesystem\Path;
@@ -20,16 +21,15 @@ use Symfony\Component\Filesystem\Path;
 class CommunityEditionUnifiedNamespaceClassMap
 {
     public function __construct(
-        protected Facts $facts,
-        protected string $editionText = "OXID eShop Community Edition was chosen.",
+        protected string $editionText = 'OXID eShop Community Edition was chosen.',
     ) {
     }
 
     public function getClassMap(): array
     {
-        $communityEditionSourcePath = $this->facts->getCommunityEditionSourcePath();
-
-        return $this->resolveUnifiedNamespaceClassMap($communityEditionSourcePath);
+        return $this->resolveUnifiedNamespaceClassMap(
+            (new EditionDirectoriesLocator())->getEditionSourcePath(Edition::Community)
+        );
     }
 
     protected function getFullPathFromSourceDirectoryToUnifiedNamespaceClassMap(string $pathToSourceDirectory): string

@@ -5,6 +5,8 @@
  * See LICENSE file for license details.
  */
 
+use OxidEsales\UnifiedNameSpaceGenerator\UnifiedNameSpaceClassMapProvider;
+
 $installationRootPath = dirname(__FILE__, 4);
 $vendorPath = $installationRootPath . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR;
 
@@ -16,9 +18,7 @@ require_once $vendorPath . 'autoload.php';
  * - In case of error, all generated files will be deleted in order not to end up with something 'incomplete'
  */
 try {
-    $facts = new \OxidEsales\Facts\Facts();
-    $unifiedNameSpaceClassMapProvider = new \OxidEsales\UnifiedNameSpaceGenerator\UnifiedNameSpaceClassMapProvider($facts);
-    $generator = new \OxidEsales\UnifiedNameSpaceGenerator\Generator($facts, $unifiedNameSpaceClassMapProvider);
+    $generator = new \OxidEsales\UnifiedNameSpaceGenerator\Generator(new UnifiedNameSpaceClassMapProvider());
     $generator->cleanupOutputDirectory();
     $generator->generate();
 } catch (\Exception $exception) {
@@ -26,8 +26,7 @@ try {
     $code = $exception->getCode();
     $traceString = $exception->getTraceAsString();
     try {
-        $unifiedNameSpaceClassMapProvider = new \OxidEsales\UnifiedNameSpaceGenerator\UnifiedNameSpaceClassMapProvider($facts);
-        $generator = new \OxidEsales\UnifiedNameSpaceGenerator\Generator($facts, $unifiedNameSpaceClassMapProvider);
+        $generator = new \OxidEsales\UnifiedNameSpaceGenerator\Generator(new UnifiedNameSpaceClassMapProvider());
         $generator->cleanupOutputDirectory();
     } catch (\Exception $exception) {
         $message = $exception->getMessage();
@@ -37,7 +36,7 @@ try {
 
     echo $message . PHP_EOL;
     echo "error code: $code" . PHP_EOL;
-    echo "stack trace:" . PHP_EOL;
+    echo 'stack trace:' . PHP_EOL;
     echo $traceString . PHP_EOL;
     exit(1);
 }
