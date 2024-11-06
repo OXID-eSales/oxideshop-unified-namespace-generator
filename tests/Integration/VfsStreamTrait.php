@@ -20,7 +20,7 @@ trait VfsStreamTrait
 
     private function getVirtualFileSystem(): ?vfsStreamDirectory
     {
-        if (is_null($this->vfsStreamDirectory)) {
+        if ($this->vfsStreamDirectory === null) {
             $this->vfsStreamDirectory = vfsStream::setup($this->rootDirectory);
         }
 
@@ -29,7 +29,7 @@ trait VfsStreamTrait
 
     private function getVirtualOutputDirectory(array $structure = null): string
     {
-        if (!is_array($structure)) {
+        if (!\is_array($structure)) {
             $structure = ['generated' => []];
         }
 
@@ -43,7 +43,7 @@ trait VfsStreamTrait
     private function copyTestDataIntoVirtualFileSystem($testCaseDirectory): void
     {
         try {
-            $pathToTestData = Path::join(dirname(__FILE__), 'testData', $testCaseDirectory);
+            $pathToTestData = Path::join(__DIR__, 'testData', $testCaseDirectory);
             $virtualFileSystem = $this->getVirtualFileSystem();
 
             vfsStream::copyFromFileSystem(

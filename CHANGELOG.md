@@ -1,12 +1,11 @@
 # Change Log for OXID eSales Unified Namespace Generator
 
-## v5.2.0 - Unreleased
-
-### Added
-- PHPUnit v11 support
+## v6.0.0 - Unreleased
 
 ### Removed
-- PHPUnit v10 support
+- Dependency on `oxideshop-facts`
+- Deprecated edition-specific class map loaders and related functionality
+- Adding exception codes on errors
 
 ### Deprecated
 - Edition-specific class map loaders and related functionality

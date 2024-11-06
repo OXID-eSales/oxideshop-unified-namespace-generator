@@ -9,17 +9,25 @@ declare(strict_types=1);
 
 namespace OxidEsales\UnifiedNameSpaceGenerator\Tests\Integration;
 
+use Exception;
 use FilesystemIterator;
+use OxidEsales\EshopCommunity\Application\Model\Article;
+use OxidEsales\EshopCommunity\Core\Contract\AbstractUpdatableFields;
+use OxidEsales\EshopCommunity\Core\Contract\ClassNameResolverInterface;
+use OxidEsales\EshopCommunity\Core\Contract\IConfigurable;
+use OxidEsales\EshopCommunity\Core\FileSystem\FileSystem;
 use OxidEsales\UnifiedNameSpaceGenerator\Exceptions\FileSystemCompatibilityException;
 use OxidEsales\UnifiedNameSpaceGenerator\Exceptions\OutputDirectoryValidationException;
 use OxidEsales\UnifiedNameSpaceGenerator\Generator;
 use OxidEsales\UnifiedNameSpaceGenerator\UnifiedNameSpaceClassMapProvider;
 use PHPUnit\Framework\Attributes\DataProvider;
-use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
+use Symfony\Component\Filesystem\Exception\IOException;
 use Symfony\Component\Filesystem\Path;
 
-class GeneratorTest extends TestCase
+final class GeneratorTest extends TestCase
 {
     use VfsStreamTrait;
 
@@ -27,54 +35,54 @@ class GeneratorTest extends TestCase
     private string $validBasePath = __DIR__ . DIRECTORY_SEPARATOR . 'testData' . DIRECTORY_SEPARATOR . 'case_valid';
 
     private array $classMapExample = [
-        'OxidEsales\Eshop\Core\Contract\AbstractUpdatableFields'    => [
-            'editionClassName' => \OxidEsales\EshopCommunity\Core\Contract\AbstractUpdatableFields::class,
-            'isAbstract'       => true,
-            'isInterface'      => false,
-            'isDeprecated'     => false
+        'OxidEsales\Eshop\Core\Contract\AbstractUpdatableFields' => [
+            'editionClassName' => AbstractUpdatableFields::class,
+            'isAbstract' => true,
+            'isInterface' => false,
+            'isDeprecated' => false
         ],
-        'OxidEsales\Eshop\Application\Model\Article'                => [
-            'editionClassName' => \OxidEsales\EshopCommunity\Application\Model\Article::class,
-            'isAbstract'       => false,
-            'isInterface'      => false,
-            'isDeprecated'     => true
+        'OxidEsales\Eshop\Application\Model\Article' => [
+            'editionClassName' => Article::class,
+            'isAbstract' => false,
+            'isInterface' => false,
+            'isDeprecated' => true
         ],
         'OxidEsales\Eshop\Core\Contract\ClassNameResolverInterface' => [
-            'editionClassName' => \OxidEsales\EshopCommunity\Core\Contract\ClassNameResolverInterface::class,
-            'isAbstract'       => false,
-            'isInterface'      => true,
-            'isDeprecated'     => false
+            'editionClassName' => ClassNameResolverInterface::class,
+            'isAbstract' => false,
+            'isInterface' => true,
+            'isDeprecated' => false
         ],
-        'OxidEsales\Eshop\Core\FileSystem\FileSystem'               => [
-            'editionClassName' => \OxidEsales\EshopCommunity\Core\FileSystem\FileSystem::class,
-            'isAbstract'       => false,
-            'isInterface'      => false,
-            'isDeprecated'     => false
+        'OxidEsales\Eshop\Core\FileSystem\FileSystem' => [
+            'editionClassName' => FileSystem::class,
+            'isAbstract' => false,
+            'isInterface' => false,
+            'isDeprecated' => false
         ],
-        'OxidEsales\Eshop\Core\Contract\IConfigurable'              => [
-            'editionClassName' => \OxidEsales\EshopCommunity\Core\Contract\IConfigurable::class,
-            'isAbstract'       => false,
-            'isInterface'      => true,
-            'isDeprecated'     => false
+        'OxidEsales\Eshop\Core\Contract\IConfigurable' => [
+            'editionClassName' => IConfigurable::class,
+            'isAbstract' => false,
+            'isInterface' => true,
+            'isDeprecated' => false
         ],
     ];
 
     private array $checkForFiles = [
-        'AbstractUpdatableFields.php'    => 'OxidEsales' . DIRECTORY_SEPARATOR . 'Eshop' . DIRECTORY_SEPARATOR .
-                                            'Core' . DIRECTORY_SEPARATOR . 'Contract' . DIRECTORY_SEPARATOR .
-                                            'AbstractUpdatableFields.php',
-        'Article.php'                    => 'OxidEsales' . DIRECTORY_SEPARATOR . 'Eshop' . DIRECTORY_SEPARATOR .
-                                            'Application' . DIRECTORY_SEPARATOR . 'Model' . DIRECTORY_SEPARATOR .
-                                            'Article.php',
+        'AbstractUpdatableFields.php' => 'OxidEsales' . DIRECTORY_SEPARATOR . 'Eshop' . DIRECTORY_SEPARATOR .
+            'Core' . DIRECTORY_SEPARATOR . 'Contract' . DIRECTORY_SEPARATOR .
+            'AbstractUpdatableFields.php',
+        'Article.php' => 'OxidEsales' . DIRECTORY_SEPARATOR . 'Eshop' . DIRECTORY_SEPARATOR .
+            'Application' . DIRECTORY_SEPARATOR . 'Model' . DIRECTORY_SEPARATOR .
+            'Article.php',
         'ClassNameResolverInterface.php' => 'OxidEsales' . DIRECTORY_SEPARATOR . 'Eshop' . DIRECTORY_SEPARATOR .
-                                            'Core' . DIRECTORY_SEPARATOR . 'Contract' . DIRECTORY_SEPARATOR .
-                                            'ClassNameResolverInterface.php',
-        'FileSystem.php'                 => 'OxidEsales' . DIRECTORY_SEPARATOR . 'Eshop' . DIRECTORY_SEPARATOR .
-                                            'Core' . DIRECTORY_SEPARATOR . 'FileSystem' . DIRECTORY_SEPARATOR .
-                                            'FileSystem.php',
-        'IConfigurable.php'              => 'OxidEsales' . DIRECTORY_SEPARATOR . 'Eshop' . DIRECTORY_SEPARATOR .
-                                            'Core' . DIRECTORY_SEPARATOR . 'Contract' . DIRECTORY_SEPARATOR .
-                                            'IConfigurable.php',
+            'Core' . DIRECTORY_SEPARATOR . 'Contract' . DIRECTORY_SEPARATOR .
+            'ClassNameResolverInterface.php',
+        'FileSystem.php' => 'OxidEsales' . DIRECTORY_SEPARATOR . 'Eshop' . DIRECTORY_SEPARATOR .
+            'Core' . DIRECTORY_SEPARATOR . 'FileSystem' . DIRECTORY_SEPARATOR .
+            'FileSystem.php',
+        'IConfigurable.php' => 'OxidEsales' . DIRECTORY_SEPARATOR . 'Eshop' . DIRECTORY_SEPARATOR .
+            'Core' . DIRECTORY_SEPARATOR . 'Contract' . DIRECTORY_SEPARATOR .
+            'IConfigurable.php',
     ];
 
     protected function setUp(): void
@@ -102,14 +110,20 @@ class GeneratorTest extends TestCase
     public function testGeneratorConstructorTargetDirectoryNotExisting(): void
     {
         $notExistingDirectory = $this->getOutputDirectory() . DIRECTORY_SEPARATOR . 'not_existing';
-        $this->assertFalse(is_dir($notExistingDirectory));
 
-        $this->setExpectedExceptionOutputDirectoryValidationException();
+        $this->expectException(OutputDirectoryValidationException::class);
 
-        $factsMock = $this->getFactsMock();
-        $providerMock = $this->getUnifiedNameSpaceProviderMock($factsMock);
+        new Generator($this->getUnifiedNameSpaceProviderMock(), $notExistingDirectory);
+    }
 
-        $this->createGenerator($factsMock, $providerMock, $notExistingDirectory);
+    public function testGenerateCannotCreateTargetDirectory(): void
+    {
+        $outputDirectory = $this->getVirtualOutputDirectory();
+        chmod($outputDirectory, 0000);
+
+        $this->expectException(OutputDirectoryValidationException::class);
+
+        (new Generator($this->getUnifiedNameSpaceProviderMock(), $outputDirectory))->generate();
     }
 
     public static function cleanupOutputDirectoryPermissionsDataProvider(): array
@@ -118,23 +132,23 @@ class GeneratorTest extends TestCase
 
         // Test case that we have existing files in path that cannot be deleted.
         $data['unable_to_delete_existing_files'] = [
-            'structure'     =>
+            'structure' =>
                 ['generated' => [
-                    'sub'         => ['some_file.txt'       => 'some_file_contents',
-                                      'some_other_file.txt' => 'some_other_file_contents'],
+                    'sub' => ['some_file.txt' => 'some_file_contents',
+                        'some_other_file.txt' => 'some_other_file_contents'],
                     'emptyFolder' => []
                 ]],
-            'permissions'   => 0444,
+            'permissions' => 0444,
             'relativePath' => 'sub'
         ];
 
         // Test case that a sub directory cannot be deleted
         $data['unable_to_delete_directory'] = [
-            'structure'     =>
+            'structure' =>
                 ['generated' => [
                     'sub' => ['subsub' => []]
                 ]],
-            'permissions'   => 0444,
+            'permissions' => 0444,
             'relativePath' => 'sub'
         ];
 
@@ -154,13 +168,10 @@ class GeneratorTest extends TestCase
          */
         chmod($outputDirectory . $relativePath, $permissions);
 
-        $this->expectException(\Symfony\Component\Filesystem\Exception\IOException::class);
+        $this->expectException(IOException::class);
 
-        $factsMock = $this->getFactsMock();
-        $providerMock = $this->getUnifiedNameSpaceProviderMock($factsMock);
-
-        $generator = $this->createGenerator($factsMock, $providerMock, $outputDirectory);
-        $generator->cleanupOutputDirectory();
+        (new Generator($this->getUnifiedNameSpaceProviderMock(), $outputDirectory))
+            ->cleanupOutputDirectory();
     }
 
     public static function mapValidationErrorsDataProvider(): array
@@ -169,27 +180,25 @@ class GeneratorTest extends TestCase
 
         // Test case, that the class maps are empty:
         $data['case_empty_class_map'] = [
-            'classMap'         => [],
-            'exceptionMessage' => 'No unified namespace found'
+            'classMap' => [],
         ];
 
         // Test case, that the complete class map has an invalid structure:
         $data['case_invalid_structure'] = [
-            'classMap'         => ['wrong key' => 'this will not work'],
-            'exceptionMessage' => 'Could not extract short unified class name from string'
+            'classMap' => ['wrong key' => 'this will not work'],
         ];
 
         // Test cases for a malformed map:
         $invalidMap = [
             'oxarticle' => [
-                'editionClassName' => \OxidEsales\EshopCommunity\Application\Model\Article::class,
-                'isAbstract'       => false,
-                'isInterface'      => false
+                'editionClassName' => Article::class,
+                'isAbstract' => false,
+                'isInterface' => false
             ]
         ];
         $data['case_no_unc_namespace'] = [
-            'classMap'         => $invalidMap,
-            'exceptionMessage' => 'Could not extract unified sub namespace from string oxarticle'];
+            'classMap' => $invalidMap,
+        ];
 
         $invalidMap = [
             'OxidEsales\Eshop\Application\Model\Article' => [
@@ -198,44 +207,28 @@ class GeneratorTest extends TestCase
                 'ccc' => false
             ]
         ];
-        $data['case_invalid_layout'] = ['classMap'         => $invalidMap,
-                                        'exceptionMessage' => 'Edition class description has a wrong layout'];
+        $data['case_invalid_layout'] = ['classMap' => $invalidMap,];
 
         return $data;
     }
 
     #[DataProvider('mapValidationErrorsDataProvider')]
-    public function testGenerateValidationErrors(array $classMap, string $exceptionMessage): void
+    public function testGenerateValidationErrors(array $classMap): void
     {
-        $this->expectException(\Exception::class, $exceptionMessage);
+        $this->expectException(Exception::class);
 
         $this->copyTestDataIntoVirtualFileSystem('case_valid');
-        $factsMock = $this->getFactsMock();
-        $providerMock = $this->getUnifiedNameSpaceProviderMock($factsMock, $classMap);
 
-        $generator = $this->createGenerator($factsMock, $providerMock, $this->getVirtualOutputDirectory());
-        $generator->generate();
-    }
-
-    public function testGenerateInvalidShopEdition(): void
-    {
-        $this->expectException(\Exception::class, 'Parameter $shopEdition has an unexpected value: "XX"');
-
-        $factsMock = $this->getFactsMock('XX');
-        $providerMock = $this->getUnifiedNameSpaceProviderMock($factsMock);
-
-        $this->createGenerator($factsMock, $providerMock, $this->getVirtualOutputDirectory());
+        (new Generator($this->getUnifiedNameSpaceProviderMock($classMap), $this->getVirtualOutputDirectory()))
+            ->generate();
     }
 
     public function testGenerateGeneratedClassesOk(): void
     {
         $this->copyTestDataIntoVirtualFileSystem('case_valid');
         $outputDirectory = $this->getOutputDirectory();
-        $factsMock = $this->getFactsMock();
-        $providerMock = $this->getUnifiedNameSpaceProviderMock($factsMock);
-
-        $generator = $this->createGenerator($factsMock, $providerMock, $outputDirectory);
-        $generator->generate();
+        (new Generator($this->getUnifiedNameSpaceProviderMock(), $outputDirectory))
+            ->generate();
 
         // verify generated files are as expected
         foreach ($this->checkForFiles as $name => $path) {
@@ -256,11 +249,8 @@ class GeneratorTest extends TestCase
     {
         $this->copyTestDataIntoVirtualFileSystem('case_valid');
         $outputDirectory = $this->getOutputDirectory();
-        $factsMock = $this->getFactsMock('EE');
-        $providerMock = $this->getUnifiedNameSpaceProviderMock($factsMock);
-
-        $generator = $this->createGenerator($factsMock, $providerMock, $this->getOutputDirectory());
-        $generator->generate();
+        (new Generator($this->getUnifiedNameSpaceProviderMock(), $this->getOutputDirectory()))
+            ->generate();
 
         // verify generated files are present but contain EE file headers.
         foreach ($this->checkForFiles as $name => $path) {
@@ -280,20 +270,6 @@ class GeneratorTest extends TestCase
         $this->testGenerateGeneratedClassesOk();
     }
 
-    public function testGenerateCannotCreateTargetDirectory(): void
-    {
-        $outputDirectory = $this->getVirtualOutputDirectory();
-        chmod($outputDirectory, 0000);
-
-        $this->setExpectedExceptionOutputDirectoryValidationException();
-
-        $factsMock = $this->getFactsMock();
-        $providerMock = $this->getUnifiedNameSpaceProviderMock($factsMock);
-
-        $generator = $this->createGenerator($factsMock, $providerMock, $outputDirectory);
-        $generator->generate();
-    }
-
     public function testGenerateCannotWriteFile(): void
     {
         /** In this case a directory named 'Article.php' is present, so the file 'Article.php' cannot be created */
@@ -307,27 +283,21 @@ class GeneratorTest extends TestCase
         $outputDirectory = $this->getVirtualOutputDirectory($structure);
 
         $file = $outputDirectory . 'OxidEsales' . DIRECTORY_SEPARATOR . 'Eshop' . DIRECTORY_SEPARATOR . 'Application' .
-                DIRECTORY_SEPARATOR . 'Model' . DIRECTORY_SEPARATOR . 'Article.php';
+            DIRECTORY_SEPARATOR . 'Model' . DIRECTORY_SEPARATOR . 'Article.php';
         chmod($file, 0444);
 
         $this->expectException(FileSystemCompatibilityException::class);
 
-        $factsMock = $this->getFactsMock();
-        $providerMock = $this->getUnifiedNameSpaceProviderMock($factsMock);
+        $generator = new Generator($this->getUnifiedNameSpaceProviderMock(), $outputDirectory);
 
-        $generator = $this->createGenerator($factsMock, $providerMock, $outputDirectory);
-        /**
-         * Suppress warning, which is raised during fopen() on vfsStreamDirectory and as a warning cannot be handled in the code.
-         * It would lead to wrong behavior of the test, as FileSystemCompatibilityException would not be thrown.
-         */
-        @$generator->generate();
+        $generator->generate();
     }
 
     private function removeTestResults(): void
     {
         $testDir = $this->getOutputDirectory();
-        $directoryIterator = new \RecursiveDirectoryIterator($testDir, FilesystemIterator::SKIP_DOTS);
-        $items = new \RecursiveIteratorIterator($directoryIterator, \RecursiveIteratorIterator::CHILD_FIRST);
+        $directoryIterator = new RecursiveDirectoryIterator($testDir, FilesystemIterator::SKIP_DOTS);
+        $items = new RecursiveIteratorIterator($directoryIterator, RecursiveIteratorIterator::CHILD_FIRST);
 
         foreach ($items as $item) {
             if ($item->isDir()) {
@@ -343,9 +313,9 @@ class GeneratorTest extends TestCase
         return Path::join(__DIR__, 'test_generated');
     }
 
-    protected function getUnifiedNameSpaceProviderMock(Facts|MockObject $facts, $classMap = null): UnifiedNameSpaceClassMapProvider
+    private function getUnifiedNameSpaceProviderMock($classMap = null): UnifiedNameSpaceClassMapProvider
     {
-        if (empty($classMap) && [] !== $classMap) {
+        if (empty($classMap) && $classMap !== []) {
             $classMap = $this->classMapExample;
         }
 
@@ -353,25 +323,15 @@ class GeneratorTest extends TestCase
             ->disableOriginalConstructor()
             ->onlyMethods(['getClassMap'])
             ->getMock();
-        $mock->expects($this->any())->method('getClassMap')->willReturn($classMap);
+        $mock->method('getClassMap')->willReturn($classMap);
 
         return $mock;
-    }
-
-    private function createGenerator($facts, $provider, $outputDirectory): Generator
-    {
-        return new Generator($facts, $provider, $outputDirectory);
-    }
-
-    private function setExpectedExceptionOutputDirectoryValidationException(): void
-    {
-        $this->expectException(OutputDirectoryValidationException::class);
     }
 
     private function assertFileExistsAfterGeneration(string $outputDirectory, string $relativeFilePath): string
     {
         $resultFile = $outputDirectory . DIRECTORY_SEPARATOR . $relativeFilePath;
-        $this->assertTrue(file_exists($resultFile), "File '$resultFile' does not exists after file generation!");
+        $this->assertFileExists($resultFile, "File '$resultFile' does not exists after file generation!");
 
         return $resultFile;
     }

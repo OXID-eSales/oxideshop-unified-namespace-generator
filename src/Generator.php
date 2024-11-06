@@ -10,7 +10,7 @@ declare(strict_types=1);
 namespace OxidEsales\UnifiedNameSpaceGenerator;
 
 use FilesystemIterator;
-use OxidEsales\EshopCommunity\Internal\Framework\FileSystem\EditionResolver;
+use OxidEsales\EshopCommunity\Internal\Framework\Edition\EditionResolver;
 use OxidEsales\UnifiedNameSpaceGenerator\Exceptions\FileSystemCompatibilityException;
 use OxidEsales\UnifiedNameSpaceGenerator\Exceptions\OutputDirectoryValidationException;
 use OxidEsales\UnifiedNameSpaceGenerator\Exceptions\PermissionException;
@@ -47,14 +47,14 @@ class Generator
 
     public function generate(): void
     {
-        $classMap = $this->unifiedNameSpaceClassMapProvider->getClassMap();
-
-        $this->generateClassFiles($classMap);
+        $this->generateClassFiles(
+            $this->unifiedNameSpaceClassMapProvider->getClassMap()
+        );
     }
 
     protected function generateClassFiles(array $classMap): void
     {
-        $backwardsCompatibilityMap = $this->getBackwardsCompatibilityMap();
+        $backwardsCompatibilityMap = (new BackwardsCompatibilityClassMapProvider())->getClassMap();
 
         $unifiedNamespaceArray = $this->getUnifiedNamespaceArray($classMap);
         $this->validateUnifiedNamespaceArray($unifiedNamespaceArray);
@@ -62,11 +62,6 @@ class Generator
         foreach ($unifiedNamespaceArray as $unifiedSubNamespace => $editionClassDescriptions) {
             $this->buildSubNamespace($unifiedSubNamespace, $editionClassDescriptions, $backwardsCompatibilityMap);
         }
-    }
-
-    protected function getBackwardsCompatibilityMap(): array
-    {
-        return (new BackwardsCompatibilityClassMapProvider())->getClassMap();
     }
 
     protected function getUnifiedNamespaceArray(array $classMap): array
@@ -165,7 +160,6 @@ class Generator
                     $currentDirectory,
                     get_current_user()
                 ),
-                ErrorEnum::CODE_FILE_CREATION_ERROR->value
             );
         }
 
@@ -177,7 +171,6 @@ class Generator
                     'Try to solve this problem and run this script again.',
                     $filePath
                 ),
-                ErrorEnum::CODE_FILE_CREATION_ERROR->value
             );
         }
 
@@ -191,7 +184,6 @@ class Generator
         if ($result === 0) {
             throw new \Exception(
                 \sprintf('Created empty file %s', $filePath),
-                ErrorEnum::CODE_FILE_CREATION_ERROR->value
             );
         }
     }
@@ -201,7 +193,6 @@ class Generator
         if (!$unifiedSubNamespace) {
             throw new \Exception(
                 'Could not extract unified sub namespace from string ' . $fullyQualifiedUnifiedClass,
-                ErrorEnum::CODE_INVALID_UNIFIED_NAMESPACE->value
             );
         }
     }
@@ -213,7 +204,7 @@ class Generator
                    'It must be a non-empty array with the following keys ' . implode(',', $expectedKeys) . ' ';
 
         if (!is_array($editionClassDescription) || empty($editionClassDescription)) {
-            throw new \Exception($message, ErrorEnum::CODE_INVALID_UNIFIED_NAMESPACE_CLASS_MAP->value);
+            throw new \Exception($message);
         }
 
         $actualKeys = array_keys($editionClassDescription);
@@ -221,7 +212,7 @@ class Generator
         sort($actualKeys);
         if ($expectedKeys != $actualKeys) {
             $message .= ' Actual edition class description is ' . var_export($editionClassDescription, true);
-            throw new \Exception($message, ErrorEnum::CODE_INVALID_UNIFIED_NAMESPACE_CLASS_MAP->value);
+            throw new \Exception($message);
         }
     }
 
@@ -232,7 +223,6 @@ class Generator
         if (!$shortUnifiedClassName) {
             throw new \Exception(
                 'Could not extract short unified a class name from string ' . $fullyQualifiedUnifiedClass,
-                ErrorEnum::CODE_INVALID_UNIFIED_CLASS_NAME->value
             );
         }
     }
@@ -242,7 +232,6 @@ class Generator
         if (empty($unifiedNamespaceArray)) {
             throw new \Exception(
                 'No unified namespace found',
-                ErrorEnum::CODE_NO_UNIFIED_NAMESPACE_FOUND->value
             );
         }
     }
@@ -258,7 +247,6 @@ class Generator
                     $this->outputDirectory,
                     get_current_user()
                 ),
-                ErrorEnum::CODE_DIRECTORY_CREATION_ERROR->value
             );
         }
 
@@ -270,7 +258,6 @@ class Generator
                     realpath($this->outputDirectory),
                     get_current_user()
                 ),
-                ErrorEnum::CODE_DIRECTORY_CREATION_ERROR->value
             );
         }
     }
