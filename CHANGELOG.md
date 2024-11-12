@@ -8,6 +8,10 @@
 ### Removed
 - PHPUnit v10 support
 
+### Deprecated
+- Edition-specific class map loaders and related functionality
+- Adding exception codes on errors
+
 ## v5.1.0 - 2024-10-14
 
 ### Added

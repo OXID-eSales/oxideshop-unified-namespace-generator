@@ -9,6 +9,9 @@ declare(strict_types=1);
 
 namespace OxidEsales\UnifiedNameSpaceGenerator\Exceptions;
 
+/**
+ * @deprecated will be removed in next major
+ */
 class InvalidEditionException extends \Exception
 {
 }

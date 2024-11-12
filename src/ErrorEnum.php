@@ -9,6 +9,9 @@ declare(strict_types=1);
 
 namespace OxidEsales\UnifiedNameSpaceGenerator;
 
+/**
+ * @deprecated will be removed in next major
+ */
 enum ErrorEnum: int
 {
     case CODE_FILE_DELETION_ERROR = 1;

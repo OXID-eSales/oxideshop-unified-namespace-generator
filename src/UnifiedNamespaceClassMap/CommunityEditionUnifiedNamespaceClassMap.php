@@ -15,11 +15,7 @@ use OxidEsales\UnifiedNameSpaceGenerator\Exceptions\InvalidUnifiedNamespaceClass
 use Symfony\Component\Filesystem\Path;
 
 /**
- * Class CommunityEditionUnifiedNamespaceClassMap
- *
- * Returns the OXID eShop Community Edition specific UnifiedNamespaceClassMap
- *
- * @package OxidEsales\UnifiedNameSpaceGenerator\UnifiedNamespaceClassMap
+ * @deprecated will be removed in next major
  */
 class CommunityEditionUnifiedNamespaceClassMap
 {

@@ -11,6 +11,9 @@ namespace OxidEsales\UnifiedNameSpaceGenerator\UnifiedNamespaceClassMap;
 
 use OxidEsales\Facts\Facts;
 
+/**
+ * @deprecated will be removed in next major
+ */
 class ProfessionalEditionUnifiedNamespaceClassMap extends CommunityEditionUnifiedNamespaceClassMap
 {
     public function __construct(
