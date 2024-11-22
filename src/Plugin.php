@@ -15,59 +15,48 @@ use Composer\IO\IOInterface;
 use Composer\Plugin\PluginInterface;
 use Composer\Script\ScriptEvents;
 
-/**
- * The composer plugin entry point class.
- */
-class Plugin implements PluginInterface, EventSubscriberInterface
+use function dirname;
+
+readonly class Plugin implements PluginInterface, EventSubscriberInterface
 {
-    protected Composer $composer;
-    protected IOInterface $io;
+    private IOInterface $io;
 
     public function activate(Composer $composer, IOInterface $io): void
     {
-        $this->composer = $composer;
         $this->io = $io;
     }
 
     public static function getSubscribedEvents(): array
     {
-        return array(
+        return [
             ScriptEvents::POST_INSTALL_CMD => 'callback',
             ScriptEvents::POST_UPDATE_CMD  => 'callback'
-        );
+        ];
     }
 
     public function callback(): void
     {
-        $generator = $this->getGenerator();
-        try {
-            $this->io->write(
-                '<info>Generating OXID eShop unified namespace classes ... </info>',
-                false
-            );
-            $generator->cleanupOutputDirectory();
-            $generator->generate();
-            $this->io->write('<info>Done</info>');
-        } catch (\Exception $exception) {
-            $this->io->writeError('<error>Failed</error>');
-            $this->io->writeError('<error>Error: ' . $exception->getMessage() . '</error>');
-            $this->io->writeError('<error>Code: ' . $exception->getCode() . '</error>');
-            $this->io->writeError(
-                '<error>Stacktrace: ' . PHP_EOL . $exception->getTraceAsString() . '</error>'
-            );
-        }
+        $this->requireAutoload();
+
+        $this->io->write('<info>Generating OXID eShop unified namespace classes</>');
+
+        $generator = new Generator(
+            new UnifiedNameSpaceClassMapProvider()
+        );
+        $generator->cleanupOutputDirectory();
+        $generator->generate();
     }
 
-    protected function getGenerator(): Generator
-    {
-        return new Generator(new UnifiedNameSpaceClassMapProvider());
-    }
-
-    public function deactivate(Composer $composer, IOInterface $io)
+    public function deactivate(Composer $composer, IOInterface $io): void
     {
     }
 
-    public function uninstall(Composer $composer, IOInterface $io)
+    public function uninstall(Composer $composer, IOInterface $io): void
     {
+    }
+
+    private function requireAutoload(): void
+    {
+        require_once dirname(__FILE__, 4) . DIRECTORY_SEPARATOR . 'autoload.php';
     }
 }
