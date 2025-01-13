@@ -15,15 +15,15 @@ use Composer\IO\IOInterface;
 use Composer\Plugin\PluginInterface;
 use Composer\Script\ScriptEvents;
 
-use function dirname;
-
 readonly class Plugin implements PluginInterface, EventSubscriberInterface
 {
     private IOInterface $io;
+    private Composer $composer;
 
     public function activate(Composer $composer, IOInterface $io): void
     {
         $this->io = $io;
+        $this->composer = $composer;
     }
 
     public static function getSubscribedEvents(): array
@@ -57,6 +57,6 @@ readonly class Plugin implements PluginInterface, EventSubscriberInterface
 
     private function requireAutoload(): void
     {
-        require_once dirname(__FILE__, 4) . DIRECTORY_SEPARATOR . 'autoload.php';
+        require_once $this->composer->getConfig()->get('vendor-dir') . '/autoload.php';
     }
 }
