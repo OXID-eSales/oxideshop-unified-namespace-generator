@@ -1,6 +1,6 @@
 # Change Log for OXID eSales Unified Namespace Generator
 
-## v6.0.0 - Unreleased
+## v6.0.0-alpha.1 - 2025-02-03
 
 ### Changed
 - Exception in Composer Plugin is not caught anymore. Errors and exceptions will be handled by Composer.
