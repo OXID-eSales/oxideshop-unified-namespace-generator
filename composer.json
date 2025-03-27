@@ -2,7 +2,7 @@
   "name": "oxid-esales/oxideshop-unified-namespace-generator",
   "type": "composer-plugin",
   "description": "OXID eShop related utility, which generates edition-specific class files for the 'unified namespace'",
-  "license": "GPL-3.0-only",
+  "license": "proprietary",
   "minimum-stability": "dev",
   "bin": [
     "./oe-eshop-unified_namespace_generator"
@@ -12,7 +12,7 @@
     "php": ">=5.6",
     "smarty/smarty": "^v2.6.30",
     "oxid-esales/oxideshop-facts": "^2.0.0",
-    "composer-plugin-api": "^1.1.0",
+    "composer-plugin-api": "^1.1.0||^2.0",
     "composer/composer": "^1.0",
     "symfony/filesystem": "^3.3"
   },

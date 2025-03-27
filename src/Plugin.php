@@ -39,6 +39,14 @@ class Plugin implements PluginInterface, EventSubscriberInterface
     /** @type IOInterface */
     protected $io;
 
+    public function deactivate(Composer $composer, IOInterface $io)
+    {
+    }
+
+    public function uninstall(Composer $composer, IOInterface $io)
+    {
+    }
+
     /**
      * The activation method is called when the plugin is activated.
      *
