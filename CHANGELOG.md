@@ -4,10 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [2.0.2] - unreleased
+## [2.0.2] - 2025-04-09
 
-### Added
-Support composer-plugin-api 2 in addition to composer-plugin-api 1
+### Changed
+- Support composer-plugin-api 2 in addition to composer-plugin-api 1
 
 
 ## [2.0.1] - 2018-12-03
