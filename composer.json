@@ -1,38 +1,38 @@
 {
-  "name": "oxid-esales/oxideshop-unified-namespace-generator",
-  "description": "OXID eShop related utility, which generates edition-specific class files for the 'unified namespace'",
-  "license": "proprietary",
-  "type": "composer-plugin",
-  "require": {
-    "php": "^8.2",
-    "composer-plugin-api": ">=2.0",
-    "composer/composer": ">=2.0",
-    "oxid-esales/oxideshop-facts": "*",
-    "symfony/filesystem": "^6.3",
-    "twig/twig": "^3.14"
-  },
-  "require-dev": {
-    "mikey179/vfsstream": "^1.6",
-    "phpunit/phpunit": "^10.4",
-    "symfony/yaml": "*"
-  },
-  "minimum-stability": "dev",
-  "prefer-stable": true,
-  "autoload": {
-    "psr-4": {
-      "OxidEsales\\UnifiedNameSpaceGenerator\\": "./src",
-      "OxidEsales\\Eshop\\": "./generated/OxidEsales/Eshop"
+    "name": "oxid-esales/oxideshop-unified-namespace-generator",
+    "description": "OXID eShop related utility, which generates edition-specific class files for the 'unified namespace'",
+    "license": "proprietary",
+    "type": "composer-plugin",
+    "require": {
+        "php": "^8.2",
+        "composer-plugin-api": ">=2.0",
+        "composer/composer": ">=2.0",
+        "oxid-esales/oxideshop-facts": "*",
+        "symfony/filesystem": "^6.3",
+        "twig/twig": "^3.14"
+    },
+    "require-dev": {
+        "mikey179/vfsstream": "^1.6",
+        "phpunit/phpunit": "^11.4",
+        "symfony/yaml": "*"
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true,
+    "autoload": {
+        "psr-4": {
+            "OxidEsales\\UnifiedNameSpaceGenerator\\": "./src",
+            "OxidEsales\\Eshop\\": "./generated/OxidEsales/Eshop"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "OxidEsales\\UnifiedNameSpaceGenerator\\Tests\\": "./tests"
+        }
+    },
+    "bin": [
+        "./oe-eshop-unified_namespace_generator"
+    ],
+    "extra": {
+        "class": "OxidEsales\\UnifiedNameSpaceGenerator\\Plugin"
     }
-  },
-  "autoload-dev": {
-    "psr-4": {
-      "OxidEsales\\UnifiedNameSpaceGenerator\\Tests\\": "./tests"
-    }
-  },
-  "bin": [
-    "./oe-eshop-unified_namespace_generator"
-  ],
-  "extra": {
-    "class": "OxidEsales\\UnifiedNameSpaceGenerator\\Plugin"
-  }
 }

@@ -1,6 +1,6 @@
 # Change Log for OXID eSales Unified Namespace Generator
 
-## v5.2.0 - Unreleased
+## v5.2.0 - 2025-04-09
 
 ### Added
 - PHPUnit v11 support
