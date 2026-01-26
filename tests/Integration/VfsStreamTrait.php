@@ -27,7 +27,7 @@ trait VfsStreamTrait
         return $this->vfsStreamDirectory;
     }
 
-    private function getVirtualOutputDirectory(array $structure = null): string
+    private function getVirtualOutputDirectory(?array $structure = null): string
     {
         if (!is_array($structure)) {
             $structure = ['generated' => []];
