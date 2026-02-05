@@ -12,10 +12,10 @@ on:
 jobs:
   run_tests:
     env:
-      SHOP_BRANCH: ${{ inputs.shop_branch || 'b-7.5.x' }}
+      SHOP_BRANCH: ${{ inputs.shop_branch || 'b-8.0.x' }}
     strategy:
       matrix:
-        php: [ '8.3', '8.4', '8.5' ]
+        php: [ '8.4', '8.5' ]
         mysql: [ '8.0', '8.4' ]
       fail-fast: false
     runs-on: ubuntu-latest
@@ -37,20 +37,6 @@ jobs:
           perl -pi\
               -e 's#/var/www/#/var/www/source/#g;'\
               containers/httpd/project.conf
-
-      - name: Prepare shop configuration
-        run: |
-          cp source/source/config.inc.php.dist source/source/config.inc.php
-          perl -pi\
-            -e 's#<dbHost>#mysql#g;'\
-            -e 's#<dbUser>#root#g;'\
-            -e 's#<dbName>#example#g;'\
-            -e 's#<dbPwd>#root#g;'\
-            -e 's#<dbPort>#3306#g;'\
-            -e 's#<sShopURL>#http://localhost.local/#g;'\
-            -e 's#<sShopDir>#/var/www/source/#g;'\
-            -e 's#<sCompileDir>#/var/www/source/tmp/#g;'\
-            source/source/config.inc.php
 
       - name: Start containers
         run: |
