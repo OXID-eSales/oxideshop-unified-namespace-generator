@@ -163,8 +163,7 @@ class Generator
             );
         }
 
-        $fileHandle = fopen($filePath, 'wb');
-        if (!$fileHandle) {
+        if ((file_exists($filePath) && !is_writable($filePath)) || !$fileHandle = fopen($filePath, 'wb')) {
             throw new FileSystemCompatibilityException(
                 \sprintf(
                     'Could not open file handle for %s. There might be a problem with your file system.' .
