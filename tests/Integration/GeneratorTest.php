@@ -323,7 +323,9 @@ final class GeneratorTest extends TestCase
             ->disableOriginalConstructor()
             ->onlyMethods(['getClassMap'])
             ->getMock();
-        $mock->method('getClassMap')->willReturn($classMap);
+        $mock->expects($this->any())
+            ->method('getClassMap')
+            ->willReturn($classMap);
 
         return $mock;
     }
