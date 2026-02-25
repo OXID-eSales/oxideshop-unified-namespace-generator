@@ -20,8 +20,12 @@ trait FactsMockTrait
             ->disableOriginalConstructor()
             ->onlyMethods(['getEdition', 'getShopRootPath'])
             ->getMock();
-        $mock->method('getEdition')->willReturn($edition);
-        $mock->method('getShopRootPath')->willReturn($this->getVirtualFilesystemRootPath());
+        $mock->expects($this->any())
+            ->method('getEdition')
+            ->willReturn($edition);
+        $mock->expects($this->any())
+            ->method('getShopRootPath')
+            ->willReturn($this->getVirtualFilesystemRootPath());
 
         return $mock;
     }
