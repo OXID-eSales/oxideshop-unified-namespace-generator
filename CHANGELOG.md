@@ -5,6 +5,9 @@
 ### Added
 - PHP v8.5 support
 
+### Fixed
+- Moved `composer/composer` to `require-dev` [#0007877](https://bugs.oxid-esales.com/view.php?id=7877)
+
 ### Removed
 - PHP v8.2 support
 

@@ -10,23 +10,25 @@ declare(strict_types=1);
 namespace OxidEsales\UnifiedNameSpaceGenerator\Tests\Integration;
 
 use OxidEsales\Facts\Facts;
-use PHPUnit\Framework\MockObject\MockObject;
 
 trait FactsMockTrait
 {
-    private function getFactsMock(string $edition = 'CE'): Facts|MockObject
+    private function getFactsMock(string $edition = 'CE'): Facts
     {
-        $mock = $this->getMockBuilder(Facts::class)
-            ->disableOriginalConstructor()
-            ->onlyMethods(['getEdition', 'getShopRootPath'])
-            ->getMock();
-        $mock->expects($this->any())
-            ->method('getEdition')
-            ->willReturn($edition);
-        $mock->expects($this->any())
-            ->method('getShopRootPath')
-            ->willReturn($this->getVirtualFilesystemRootPath());
+        $root = $this->getVirtualFilesystemRootPath();
 
-        return $mock;
+        $stub = $this->createStub(Facts::class);
+        $stub->method('getEdition')
+            ->willReturn($edition);
+        $stub->method('getShopRootPath')
+            ->willReturn($root);
+        $stub->method('getCommunityEditionSourcePath')
+            ->willReturn($root . 'vendor/oxid-esales/oxideshop-ce/source');
+        $stub->method('getProfessionalEditionRootPath')
+            ->willReturn($root . 'vendor/oxid-esales/oxideshop-pe');
+        $stub->method('getEnterpriseEditionRootPath')
+            ->willReturn($root . 'vendor/oxid-esales/oxideshop-ee');
+
+        return $stub;
     }
 }

@@ -10,12 +10,12 @@ declare(strict_types=1);
 namespace OxidEsales\UnifiedNameSpaceGenerator\Tests\Integration;
 
 use FilesystemIterator;
+use OxidEsales\Facts\Facts;
 use OxidEsales\UnifiedNameSpaceGenerator\Exceptions\FileSystemCompatibilityException;
 use OxidEsales\UnifiedNameSpaceGenerator\Exceptions\OutputDirectoryValidationException;
 use OxidEsales\UnifiedNameSpaceGenerator\Generator;
 use OxidEsales\UnifiedNameSpaceGenerator\UnifiedNameSpaceClassMapProvider;
 use PHPUnit\Framework\Attributes\DataProvider;
-use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Filesystem\Path;
 
@@ -344,17 +344,14 @@ class GeneratorTest extends TestCase
         return Path::join(__DIR__, 'test_generated');
     }
 
-    protected function getUnifiedNameSpaceProviderMock(Facts|MockObject $facts, $classMap = null): UnifiedNameSpaceClassMapProvider
+    protected function getUnifiedNameSpaceProviderMock(Facts $facts, $classMap = null): UnifiedNameSpaceClassMapProvider
     {
         if (empty($classMap) && [] !== $classMap) {
             $classMap = $this->classMapExample;
         }
 
-        $mock = $this->getMockBuilder(UnifiedNameSpaceClassMapProvider::class)
-            ->disableOriginalConstructor()
-            ->onlyMethods(['getClassMap'])
-            ->getMock();
-        $mock->expects($this->any())->method('getClassMap')->willReturn($classMap);
+        $mock = $this->createStub(UnifiedNameSpaceClassMapProvider::class);
+        $mock->method('getClassMap')->willReturn($classMap);
 
         return $mock;
     }
