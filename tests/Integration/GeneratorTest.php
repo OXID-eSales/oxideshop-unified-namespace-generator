@@ -318,14 +318,8 @@ final class GeneratorTest extends TestCase
         if (empty($classMap) && $classMap !== []) {
             $classMap = $this->classMapExample;
         }
-
-        $mock = $this->getMockBuilder(UnifiedNameSpaceClassMapProvider::class)
-            ->disableOriginalConstructor()
-            ->onlyMethods(['getClassMap'])
-            ->getMock();
-        $mock->expects($this->any())
-            ->method('getClassMap')
-            ->willReturn($classMap);
+        $mock = $this->createStub(UnifiedNameSpaceClassMapProvider::class);
+        $mock->method('getClassMap')->willReturn($classMap);
 
         return $mock;
     }

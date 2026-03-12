@@ -4,9 +4,11 @@
     "license": "proprietary",
     "type": "composer-plugin",
     "require": {
-        "composer-plugin-api": ">=2.0",
-        "composer/composer": ">=2.0",
-        "twig/twig": "^3.14"
+      "composer-plugin-api": ">=2.0",
+      "twig/twig": "^3.14"
+    },
+    "require-dev": {
+      "composer/composer": ">=2.0"
     },
     "minimum-stability": "dev",
     "prefer-stable": true,
