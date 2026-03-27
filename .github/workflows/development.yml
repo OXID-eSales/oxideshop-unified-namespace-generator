@@ -57,7 +57,7 @@ jobs:
 
       - name: Upload PHPUnit Log
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: phpunit-logs-PHP${{ matrix.php }}-MYSQL${{ matrix.mysql }}
           path: PHP${{ matrix.php }}_MYSQL${{ matrix.mysql }}_phpunit_log.txt
