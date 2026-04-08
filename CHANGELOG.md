@@ -1,6 +1,6 @@
 # Change Log for OXID eSales Unified Namespace Generator
 
-## v5.3.0 - unreleased
+## v5.3.0 - 2026-04-08
 
 ### Added
 - PHP v8.5 support
