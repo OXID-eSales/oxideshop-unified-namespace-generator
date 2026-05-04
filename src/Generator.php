@@ -306,7 +306,10 @@ class Generator
     {
         $this->validateOutputDirectoryPermissions();
 
-        $unifiedSubNamespacePath = Path::join($this->outputDirectory, $unifiedSubNamespace);
+        $unifiedSubNamespacePath = Path::join(
+            $this->outputDirectory,
+            str_replace('\\', '/', $unifiedSubNamespace)
+        );
         $this->fileSystem->mkdir($unifiedSubNamespacePath, 0755);
 
         return $unifiedSubNamespacePath;
