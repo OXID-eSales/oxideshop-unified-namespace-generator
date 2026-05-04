@@ -1,5 +1,10 @@
 # Change Log for OXID eSales Unified Namespace Generator
 
+## v5.3.1 - unreleased
+
+### Fixed
+- File path normalizing for sub-namespaces containing backslashes
+
 ## v5.3.0 - unreleased
 
 ### Added
