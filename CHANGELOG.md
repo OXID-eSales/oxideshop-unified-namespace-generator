@@ -5,7 +5,7 @@
 ### Fixed
 - File path normalizing for sub-namespaces containing backslashes
 
-## v5.3.0 - unreleased
+## v5.3.0 - 2026-04-08
 
 ### Added
 - PHP v8.5 support
