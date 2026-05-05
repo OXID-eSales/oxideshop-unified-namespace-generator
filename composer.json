@@ -10,7 +10,7 @@
     "require-dev": {
       "composer/composer": ">=2.0"
     },
-    "minimum-stability": "dev",
+    "minimum-stability": "stable",
     "prefer-stable": true,
     "autoload": {
         "psr-4": {

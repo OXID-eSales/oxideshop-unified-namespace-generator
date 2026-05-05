@@ -7,7 +7,7 @@ This tools implements a composer plugin, but can also be executed as a
  vendor/bin/oe-eshop-unified_namespace_generator
  ```
 
-See also [Documentation on docs.oxid-esales.com](https://docs.oxid-esales.com/developer/en/7.0/system_architecture/unified_namespace/unified_namespace_generator.html#unified-namespace-generator)
+See also [Documentation on docs.oxid-esales.com](https://docs.oxid-esales.com/developer/en/latest/system_architecture/unified_namespace/unified_namespace_generator.html#unified-namespace-generator)
 
 
 ## Development
