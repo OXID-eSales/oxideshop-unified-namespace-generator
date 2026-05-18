@@ -1,6 +1,6 @@
 # Change Log for OXID eSales Unified Namespace Generator
 
-## v5.3.1 - unreleased
+## v5.3.1 - 2026-05-07
 
 ### Fixed
 - File path normalizing for sub-namespaces containing backslashes
@@ -15,6 +15,11 @@
 
 ### Removed
 - PHP v8.2 support
+
+## v5.2.1 - 2026-05-07
+
+### Fixed
+- File path normalizing for sub-namespaces containing backslashes
 
 ## v5.2.0 - 2025-04-09
 
