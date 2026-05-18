@@ -16,6 +16,11 @@
 ### Removed
 - PHP v8.2 support
 
+## v5.2.1 - 2026-05-07
+
+### Fixed
+- File path normalizing for sub-namespaces containing backslashes
+
 ## v5.2.0 - 2025-04-09
 
 ### Added
