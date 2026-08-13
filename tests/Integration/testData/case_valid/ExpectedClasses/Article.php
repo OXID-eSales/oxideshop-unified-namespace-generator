@@ -21,11 +21,3 @@ namespace OxidEsales\Eshop\Application\Model;
 class Article extends \OxidEsales\EshopCommunity\Application\Model\Article
 {
 }
-
-/**
- * This class alias is created for backwards compatibility only.
- * The class oxarticle is deprecated since OXID eShop v6.0.0 and should not be used any more as it
- * will be removed in the future.
- * Please use \OxidEsales\Eshop\Application\Model\Article instead.
- */
-class_alias(\OxidEsales\Eshop\Application\Model\Article::class, 'oxarticle');

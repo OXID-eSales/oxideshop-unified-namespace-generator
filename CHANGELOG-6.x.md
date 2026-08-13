@@ -3,6 +3,10 @@
 ## v8.0.0-alpha.3 - Unreleased
 *Compilation release*
 
+### Removed
+- Generation of backwards-compatibility class aliases for legacy class names (e.g. `oxarticle`) in
+  generated unified-namespace classes
+
 ## v8.0.0-alpha.2 - 2026-02-12
 *Compilation release*
 

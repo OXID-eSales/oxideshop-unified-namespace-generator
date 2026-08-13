@@ -54,13 +54,11 @@ class Generator
 
     protected function generateClassFiles(array $classMap): void
     {
-        $backwardsCompatibilityMap = (new BackwardsCompatibilityClassMapProvider())->getClassMap();
-
         $unifiedNamespaceArray = $this->getUnifiedNamespaceArray($classMap);
         $this->validateUnifiedNamespaceArray($unifiedNamespaceArray);
 
         foreach ($unifiedNamespaceArray as $unifiedSubNamespace => $editionClassDescriptions) {
-            $this->buildSubNamespace($unifiedSubNamespace, $editionClassDescriptions, $backwardsCompatibilityMap);
+            $this->buildSubNamespace($unifiedSubNamespace, $editionClassDescriptions);
         }
     }
 
@@ -91,8 +89,7 @@ class Generator
 
     protected function buildSubNamespace(
         string $unifiedSubNamespace,
-        array $editionClassDescriptions,
-        array $backwardsCompatibilityMap
+        array $editionClassDescriptions
     ): void {
         $subNamespacePath = $this->createUnifiedNamespaceSubDirectory($unifiedSubNamespace);
 
@@ -102,36 +99,20 @@ class Generator
             $fullyQualifiedUnifiedClass = '\\' . trim($unifiedSubNamespace .
                     '\\' . $shortUnifiedClassName, '\\');
 
-            $backwardsCompatibleClass = $this->getBackwardsCompatibleClass(
-                $fullyQualifiedUnifiedClass,
-                $backwardsCompatibilityMap
-            );
-
             $content = $this->renderContent(
                 $unifiedSubNamespace,
                 $editionClassDescription,
-                $fullyQualifiedUnifiedClass,
-                $backwardsCompatibleClass
+                $fullyQualifiedUnifiedClass
             );
 
             $this->writeFile($filePath, $content);
         }
     }
 
-    private function getBackwardsCompatibleClass(
-        string $fullyQualifiedUnifiedClass,
-        array $backwardsCompatibilityMap
-    ): ?string {
-        $backwardsCompatibilityMapIndex = trim($fullyQualifiedUnifiedClass, '\\');
-
-        return $backwardsCompatibilityMap[$backwardsCompatibilityMapIndex] ?? null;
-    }
-
     protected function renderContent(
         string $unifiedSubNamespace,
         array $editionClassDescription,
-        string $fullyQualifiedUnifiedClass,
-        ?string $backwardsCompatibleClass
+        string $fullyQualifiedUnifiedClass
     ): string {
         return $this->getTwig()
             ->render(
@@ -141,7 +122,6 @@ class Generator
                     'class' => $editionClassDescription,
                     'namespace' => $unifiedSubNamespace,
                     'fullyQualifiedUnifiedClass' => $fullyQualifiedUnifiedClass,
-                    'backwardsCompatibleClass' => $backwardsCompatibleClass,
                 ]
             );
     }

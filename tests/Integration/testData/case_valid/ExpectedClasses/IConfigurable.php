@@ -19,11 +19,3 @@ namespace OxidEsales\Eshop\Core\Contract;
 interface IConfigurable extends \OxidEsales\EshopCommunity\Core\Contract\IConfigurable
 {
 }
-
-/**
- * This class alias is created for backwards compatibility only.
- * The class oxiconfigurable is deprecated since OXID eShop v6.0.0 and should not be used any more as it
- * will be removed in the future.
- * Please use \OxidEsales\Eshop\Core\Contract\IConfigurable instead.
- */
-class_alias(\OxidEsales\Eshop\Core\Contract\IConfigurable::class, 'oxiconfigurable');
