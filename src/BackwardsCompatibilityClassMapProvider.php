@@ -12,6 +12,9 @@ namespace OxidEsales\UnifiedNameSpaceGenerator;
 use OxidEsales\Facts\Facts;
 use OxidEsales\UnifiedNameSpaceGenerator\Exceptions\InvalidBackwardsCompatibilityClassMapException;
 
+/**
+ * @deprecated will be removed in v8.0
+ */
 class BackwardsCompatibilityClassMapProvider
 {
     public function __construct(private readonly Facts $facts)

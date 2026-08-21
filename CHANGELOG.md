@@ -1,5 +1,10 @@
 # Change Log for OXID eSales Unified Namespace Generator
 
+## v5.4.0 - Unreleased
+
+### Deprecated
+- Generation of backwards-compatibility class aliases for legacy class names in generated unified-namespace classes
+
 ## v5.3.1 - 2026-05-07
 
 ### Fixed
