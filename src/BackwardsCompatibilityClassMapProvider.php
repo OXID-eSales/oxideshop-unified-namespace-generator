@@ -13,7 +13,7 @@ use OxidEsales\Facts\Facts;
 use OxidEsales\UnifiedNameSpaceGenerator\Exceptions\InvalidBackwardsCompatibilityClassMapException;
 
 /**
- * @deprecated will be removed in v8.0
+ * @deprecated
  */
 class BackwardsCompatibilityClassMapProvider
 {

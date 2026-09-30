@@ -4,7 +4,7 @@
     "license": "proprietary",
     "type": "composer-plugin",
     "require": {
-        "php": "^8.3",
+        "php": "^8.4",
         "composer-plugin-api": ">=2.0",
         "oxid-esales/oxideshop-facts": "*",
         "symfony/filesystem": "^6.3",
