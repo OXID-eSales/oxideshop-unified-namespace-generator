@@ -113,7 +113,7 @@ class Generator
     protected function buildSubNamespace(
         string $unifiedSubNamespace,
         array $editionClassDescriptions,
-        /** @deprecated will be removed in v8.0 */
+        /** @deprecated */
         array $backwardsCompatibilityMap
     ): void {
         $subNamespacePath = $this->createUnifiedNamespaceSubDirectory($unifiedSubNamespace);
@@ -153,7 +153,7 @@ class Generator
         string $unifiedSubNamespace,
         array $editionClassDescription,
         string $fullyQualifiedUnifiedClass,
-        /** @deprecated will be removed in v8.0 */
+        /** @deprecated */
         ?string $backwardsCompatibleClass
     ): string {
         $twig = $this->getTwig();
